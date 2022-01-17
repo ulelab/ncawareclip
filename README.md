@@ -37,4 +37,6 @@ git clone https://github.com/ulelab/ncawareclip.git
 
 # Notes on RepBase
 
+# Publications using this pipeline
+
 For any questions please feel free to raise a GitHub issue or contact me at charlotte.capitanchik@crick.ac.uk.
