@@ -21,7 +21,7 @@ git clone https://github.com/ulelab/ncawareclip.git
 ```
 ```
 
-4. Edit `config.yaml` to provide paths to your demultiplexed fastq files and path where you are running the pipeline. For UMI removal make sure that the random barcode is moved to the fastq header as "RBC:NNNNN".
+4. Edit `config.yaml` to provide paths to your demultiplexed fastq files and path where you are running the pipeline. For UMI removal make sure that the random barcode is moved to the fastq header as "RBC:NNNNN". I would highly recommend the speedy demultiplexer [Ultraplex](https://github.com/ulelab/ultraplex) for completely unbiased reasons.
 ```
 ```
 
