@@ -31,6 +31,8 @@ git clone https://github.com/ulelab/ncawareclip.git
 
 # The output
 
+# Detailed pipeline options
+
 # Notes on tRNAs
 
 # Notes on snRNAs
