@@ -1,0 +1,21 @@
+# Define pipeline path
+datapath: lab/luscomben/home/users/capitac/ncawareclip
+# Define samples
+samples:
+# NSUN2_m5C:
+    NSUN2_HEK293T_NNNCAATNN_20120628_LUe50_1: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/NSUN2_miCLIP/demux_NNNCAATNN.fq.gz
+
+# Files for index generation and mapping #
+
+# Sequences
+genome_index: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/results/genome_star_index
+genome_fai: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/GRCh38.primary_assembly.genome.fa.fai
+mitochondrial_genome: /camp/lab/luscomben/home/users/capitac/small_rna_index.2/human_chm_grch38gencode.fa
+MATURE_tRNAs: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/gtrnadb_data/hg38-tRNAs/hg38-tRNAs-mature.fa
+IMMATURE_tRNAs: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/gtrnadb_data/hg38-tRNAs/hg38-tRNAs-immature-deduplicated.fa
+
+
+# Annotation
+genome: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/GRCh38.primary_assembly.genome_withoutchrM.fa
+genome_fai: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/GRCh38.primary_assembly.genome_withoutchrM.fa.fai
+genome_gtf_file: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/gencode.v27.primary_assembly.annotation.gtf

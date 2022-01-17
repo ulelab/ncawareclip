@@ -1,0 +1,550 @@
+# Import config file & parameters
+configfile: 'config.yaml'
+
+# The first rule in the document contains a list of all the deadend outputs expected
+# from the pipeline, that is, every output that isn't used in a subsequent rule.
+rule all:
+    input:
+        "results/rRNA_bowtie_index/rRNA_bowtie.1.ebwt",
+        "results/maturetRNA_bowtie_index/maturetRNA_bowtie.1.ebwt",
+        "results/immaturetRNA_bowtie_index/immaturetRNA_bowtie.1.ebwt",
+        "results/maturesnRNA_bowtie_index/maturesnRNA_bowtie.1.ebwt",
+        "results/immaturesnRNA_bowtie_index/immaturesnRNA_bowtie.1.ebwt",
+        "results/chrM_bowtie_index/chrM_bowtie.1.ebwt",
+        expand("results/rRNA_xlsites/{sample}.small.bedgraph", sample=config["samples"]),
+        expand("results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam.bai", sample=config["samples"]),
+        expand("results/maturetRNA_statistics/{sample}_trna_summary_stats.tsv", sample=config["samples"]),
+        expand("results/maturetRNA_statistics/{sample}_trnas.cdnacounts", sample=config["samples"]),
+        expand("results/immaturetRNA_xlsites/{sample}.small.bedgraph", sample=config["samples"]),
+        expand("results/immaturesnRNA_xlsites/{sample}.small.bedgraph", sample=config["samples"]),
+        expand("results/maturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed", sample=config["samples"]),
+        expand("results/genome_ucsc_bedgraphs/{sample}.genome.bedgraph", sample=config["samples"]),
+        expand("results/genome_bedgraphs/{sample}.genome.bedgraph", sample=config["samples"]),
+        expand("results/annotation_xlsites/{sample}.genome_overlaps", sample=config["samples"]),
+        expand("results/annotation_xlsites/{sample}.final_annotation", sample=config["samples"]),
+        expand("results/genome_xlsites/{sample}.multi.bed", sample=config["samples"])
+
+rule trimGalore:
+    input:
+        lambda wildcards: config["samples"][wildcards.sample]
+    output:
+        fastq="results/trim_galore/{sample}_trimmed.fq.gz",
+        report="results/trim_galore/{sample}.fq.gz_trimming_report.txt",
+        fastqc="results/trim_galore/{sample}_trimmed_fastqc.html",
+        fastqc_zip="results/trim_galore/{sample}_trimmed_fastqc.zip"
+    params:
+        basic="-q 20 --gzip --length 11 --fastqc",
+        outputfolder="-o results/trim_galore",
+        log="results/trim_galore/{sample}_trimming_report.txt",
+        cluster= '-N 1 -c 5 --mem=30G -t 2:00:00'
+    run:
+        shell("trim_galore {params.basic} {params.outputfolder} {input} &> {params.log}")
+        trimmed_out = "/".join(("results/trim_galore", os.path.basename(input[0])))
+        trimmed_rep = "_".join((trimmed_out, "trimming_report.txt"))
+        trimmed_out = trimmed_out.replace(".fq.gz","")
+        trimmed_out = "_".join((trimmed_out, "trimmed.fq.gz"))
+        trimmed_fastqc = trimmed_out.replace("trimmed.fq.gz","trimmed_fastqc.html")
+        trimmed_fastqc_zip = trimmed_out.replace("trimmed.fq.gz","trimmed_fastqc.zip")
+        shell("echo {trimmed_out}")
+        shell("mv {trimmed_out} {output.fastq}")
+        shell("echo {trimmed_rep}")
+        shell("mv {trimmed_rep} {output.report}")
+        shell("echo {trimmed_fastqc}")
+        shell("mv {trimmed_fastqc} {output.fastqc}")
+        shell("echo {trimmed_fastqc_zip}")
+        shell("mv {trimmed_fastqc_zip} {output.fastqc_zip}")
+
+rule rRNA_bowtieIndex:
+    input:
+        genome_fasta=config["rRNA_sequence"]
+    threads:
+        8
+    params:
+        outdir="results/rRNA_bowtie_index/rRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 16:00:00'
+    output:
+        index="results/rRNA_bowtie_index/rRNA_bowtie.1.ebwt"
+    shell:
+        """
+        bowtie-build {input.genome_fasta} {params.outdir}
+        """
+
+rule rRNA_bowtieMap:
+    input:
+        fastq="results/trim_galore/{sample}_trimmed.fq.gz"
+    output:
+        sam=temp("results/rRNA_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.rRNA.log",
+        unmapped_reads="results/rRNA_mapped/{sample}.Unmapped.fq",
+        bam="results/rRNA_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/rRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
+    params:
+        bowtie_index="results/rRNA_bowtie_index/rRNA_bowtie",
+        cluster="-N 1 -c 8 -J rRNA_map --mem=32G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        gunzip -c {input.fastq} | \
+        bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
+
+rule rRNA_getCDNAcounts:
+    input:
+        "results/rRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        bed="results/rRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
+        cdnacounts="results/rRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+        bedgraph="results/rRNA_xlsites/{sample}.small.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        bedtools bamtobed -i {input} > {output.bed}
+        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
+        cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
+        sed -i '1 i\ track type=bedGraph' {output.bedgraph}
+        """
+
+rule maturetRNA_bowtieIndex:
+    input:
+        genome_fasta=config["mature.tRNA_sequence"]
+    threads:
+        8
+    params:
+        outdir="results/maturetRNA_bowtie_index/maturetRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 16:00:00'
+    output:
+        index="results/maturetRNA_bowtie_index/maturetRNA_bowtie.1.ebwt"
+    shell:
+        """
+        bowtie-build {input.genome_fasta} {params.outdir}
+        """
+
+rule maturetRNA_bowtieMap:
+    input:
+        fastq="results/rRNA_mapped/{sample}.Unmapped.fq"
+    output:
+        sam=temp("results/maturetRNA_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.maturetRNA_.log",
+        unmapped_reads="results/maturetRNA_mapped/{sample}.Unmapped.fq",
+        bam="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
+    params:
+        bowtie_index="results/maturetRNA_bowtie_index/maturetRNA_bowtie",
+        cluster="-N 1 -c 8 -J bt_map_maturetRNA --mem=32G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        cat {input.fastq} | \
+        bowtie -a --best --strata -v 2 -m 100 --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
+
+rule removeTRNApcrdupes:
+    input:
+        "results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        bam="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.deduplicated.bam",
+        indexed="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.deduplicated.bam.bai"
+    params:
+        cluster="-N 1 -c 8 -J bt_map_maturetRNA --mem=64G -t 6:00:00"
+    shell:
+        """
+        python scripts/removeDuplicatesFromBam.py {input} {output.bam}
+        samtools index {output.bam}
+        """
+
+rule gettRNAstats:
+    input:
+        reads="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        "results/maturetRNA_statistics/{sample}_trna_summary_stats.tsv",
+        "results/maturetRNA_statistics/{sample}_trnas.cdnacounts"
+    params:
+        cluster= '-N 1 -c 8 --mem=100G -t 1:00:00',
+        sample = "{sample}",
+        samp_and_dir= "results/maturetRNA_statistics/{sample}",
+        seed="42",
+        fraction_merge="0.9"
+    shell:
+        """
+        export PATH=/camp/lab/luscomben/working/charlotte/software/miniconda2/envs/p27/bin:$PATH
+        python scripts/gettRNAxlsites_v2.py {input.reads} {params.samp_and_dir} {params.sample} {params.seed} {params.fraction_merge}
+        """
+
+rule immaturetRNA_bowtieIndex:
+    input:
+        genome_fasta=config["immature.tRNA_sequence"]
+    threads:
+        8
+    params:
+        outdir="results/immaturetRNA_bowtie_index/immaturetRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 16:00:00'
+    output:
+        index="results/immaturetRNA_bowtie_index/immaturetRNA_bowtie.1.ebwt"
+    shell:
+        """
+        bowtie-build {input.genome_fasta} {params.outdir}
+        """
+
+
+rule immaturetRNA_bowtieMap:
+    input:
+        fastq="results/maturetRNA_mapped/{sample}.Unmapped.fq"
+    output:
+        sam=temp("results/immature_tRNA_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.immaturetRNA.log",
+        unmapped_reads="results/immaturetRNA_mapped/{sample}.Unmapped.fq",
+        bam="results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
+    params:
+        bowtie_index="results/immaturetRNA_bowtie_index/immaturetRNA_bowtie",
+        cluster="-N 1 -c 8 -J bt_map_immaturetRNA --mem=32G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        cat {input.fastq} | \
+        bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
+
+rule immaturetRNA_getCDNAcounts:
+    input:
+        "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        bed="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
+        cdnacounts="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+        bedgraph="results/immaturetRNA_xlsites/{sample}.small.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        bedtools bamtobed -i {input} > {output.bed}
+        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
+        cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
+        sed -i '1 i\ track type=bedGraph' {output.bedgraph}
+        """
+
+rule maturesnRNA_bowtieIndex:
+    input:
+        genome_fasta=config["mature.snRNA_sequence"]
+    threads:
+        8
+    params:
+        outdir="results/maturesnRNA_bowtie_index/maturesnRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 16:00:00'
+    output:
+        index="results/maturesnRNA_bowtie_index/maturesnRNA_bowtie.1.ebwt"
+    shell:
+        """
+        bowtie-build {input.genome_fasta} {params.outdir}
+        """
+
+rule maturesnRNA_bowtieMap:
+    input:
+        fastq="results/immaturetRNA_mapped/{sample}.Unmapped.fq"
+    output:
+        sam=temp("results/maturesnRNA_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.maturesnRNA.log",
+        unmapped_reads="results/maturesnRNA_mapped/{sample}.Unmapped.fq",
+        bam="results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
+    params:
+        bowtie_index="results/maturesnRNA_bowtie_index/maturesnRNA_bowtie",
+        cluster="-N 1 -c 8 -J bt_map_maturesnRNA --mem=32G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        cat {input.fastq} | \
+        bowtie -a -v 2 -m 100 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
+
+rule maturesnRNA_getCDNAcounts:
+    input:
+        "results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        "results/maturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        bedtools bamtobed -i {input} > {output}
+        """
+
+rule immaturesnRNA_bowtieIndex:
+    input:
+        genome_fasta=config["immature.snRNA_sequence"]
+    threads:
+        8
+    params:
+        outdir="results/immaturesnRNA_bowtie_index/immaturesnRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 16:00:00'
+    output:
+        index="results/immaturesnRNA_bowtie_index/immaturesnRNA_bowtie.1.ebwt"
+    shell:
+        """
+        bowtie-build {input.genome_fasta} {params.outdir}
+        """
+
+rule immaturesnRNA_bowtieMap:
+    input:
+        fastq="results/maturesnRNA_mapped/{sample}.Unmapped.fq"
+    output:
+        sam=temp("results/immaturesnRNA_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.immaturesnRNA.log",
+        unmapped_reads="results/immaturesnRNA_mapped/{sample}.Unmapped.fq",
+        bam="results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
+    params:
+        bowtie_index="results/immaturesnRNA_bowtie_index/immaturesnRNA_bowtie",
+        cluster="-N 1 -c 8 -J bt_map_immaturesnRNA --mem=32G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        cat {input.fastq} | \
+        bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
+
+rule immaturesnRNA_getCDNAcounts:
+    input:
+        "results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        bed="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
+        cdnacounts="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+        bedgraph="results/immaturesnRNA_xlsites/{sample}.small.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        bedtools bamtobed -i {input} > {output.bed}
+        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
+        cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
+        sed -i '1 i\ track type=bedGraph' {output.bedgraph}
+        """
+
+rule chrM_bowtieIndex:
+    input:
+        genome_fasta=config["chrM_sequence"]
+    threads:
+        8
+    params:
+        outdir="results/chrM_bowtie_index/chrM_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 16:00:00'
+    output:
+        index="results/chrM_bowtie_index/chrM_bowtie.1.ebwt"
+    shell:
+        """
+        bowtie-build {input.genome_fasta} {params.outdir}
+        """
+
+rule chrM_bowtieMap:
+    input:
+        fastq="results/immaturesnRNA_mapped/{sample}.Unmapped.fq"
+    output:
+        sam=temp("results/chrM_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.chrM.log",
+        unmapped_reads="results/chrM_mapped/{sample}.Unmapped.fq",
+        bam="results/chrM_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/chrM_mapped/{sample}.Aligned.out.sorted.bam.bai"
+    params:
+        bowtie_index="results/chrM_bowtie_index/chrM_bowtie",
+        cluster="-N 1 -c 8 -J bt_map_chrM --mem=32G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        cat {input.fastq} | \
+        bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
+
+rule chrM_getCDNAcounts:
+    input:
+        "results/chrM_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        bed="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.bed",
+        cdnacounts="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+        bedgraph="results/chrM_xlsites/{sample}.small.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        bedtools bamtobed -i {input} > {output.bed}
+        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
+        cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
+        sed -i '1 i\ track type=bedGraph' {output.bedgraph}
+        """
+
+rule genomeSTARindex:
+    input:
+        genome_fasta=config["genome_minuschrM_sequence"],
+        gtf=config["genome_annotation"]
+    threads:
+        8
+    params:
+        outdir="results/genome_star_index/",
+        cluster= '-p cpu -J star_index  -t 2:00:00 -n 1 --mem 32GB -c 8'
+    output:
+        index="results/genome_star_index/exonInfo.tab"
+    shell:
+        """
+        STAR --runThreadN {threads} \
+        --runMode genomeGenerate --genomeDir {params.outdir} \
+        --genomeFastaFiles {input.genome_fasta} --sjdbGTFfile {input.gtf} \
+        --outFileNamePrefix {params.outdir} \
+        --sjdbOverhang 49
+        """
+
+rule genomeMapreads:
+    input:
+        fastq="results/chrM_mapped/{sample}.Unmapped.fq",
+        msg="results/genome_star_index/exonInfo.tab"
+    output:
+        sam="results/genome_mapped/{sample}.Aligned.out.sam",
+        logfolder="results/logs/{sample}.genome_mapped.Log.final.out"
+    params:
+        star_index="results/genome_star_index/",
+        log="results/genome_mapped/{sample}.Log.final.out",
+        outprefix="results/genome_mapped/{sample}.",
+        cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
+    threads:
+        8
+    shell:
+        """
+        STAR --runThreadN {threads} \
+        --genomeDir {params.star_index} \
+        --readFilesIn {input.fastq} \
+        --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
+        --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
+        --outSAMattributes All --alignSJoverhangMin 100000000 --alignSJDBoverhangMin 1 --outFilterType BySJout \
+        --alignIntronMin 20 --alignIntronMax 1000000 --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
+         --outFilterMismatchNoverReadLmax 0.04
+        mv {params.log} {output.logfolder}
+        """
+
+
+rule makegenomeBam:
+    input:
+        samfile="results/genome_mapped/{sample}.Aligned.out.sam"
+    output:
+        Uniquebamfile="results/genome_mapped/{sample}.Aligned.out.sorted.bam",
+        Multibamfile="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam",
+        Uniqueindex="results/genome_mapped/{sample}.Aligned.out.sorted.bam.bai",
+        Multiindex="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam.bai"
+    params:
+        cluster="-N 1 -c 8 --mem=8G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        sambamba view -t {threads} -S -f bam -F "mapping_quality==255" {input.samfile} | sambamba sort /dev/stdin -o {output.Uniquebamfile}
+        sambamba view -t {threads} -S -f bam -F "mapping_quality!=255" {input.samfile} | sambamba sort /dev/stdin -o {output.Multibamfile}
+        sambamba index -t {threads} {output.Uniquebamfile} {output.Uniqueindex}
+        sambamba index -t {threads} {output.Multibamfile} {output.Multiindex}
+        """
+
+rule getgenomeCDNAcounts:
+    input:
+        uniq="results/genome_mapped/{sample}.Aligned.out.sorted.bam",
+        multi="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam"
+    output:
+        uniq_bed="results/genome_xlsites/{sample}.Aligned.out.sorted.bed",
+        cdnacounts="results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts",
+        multi_bed="results/genome_xlsites/{sample}.multi.bed",
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        bedtools bamtobed -i {input.uniq} > {output.uniq_bed}
+        bedtools bamtobed -i {input.multi} > {output.multi_bed}
+        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.uniq_bed} {output.cdnacounts}
+        """
+
+rule getGenomeBedgraphs:
+    input:
+        "results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts"
+    output:
+        "results/genome_bedgraphs/{sample}.genome.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        awk '{{print $1 "\\t" $2 "\\t" $3 "\\t" $6 $5}}' {input} > {output}
+        """
+
+rule getUCSCBedgraphs:
+    input:
+        "results/genome_bedgraphs/{sample}.genome.bedgraph"
+    output:
+        "results/genome_ucsc_bedgraphs/{sample}.genome.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        python3 scripts/chroms_to_ucsc.py --infile {input} --outfile {output} --species 'Homo sapiens'
+        """
+
+rule getMerged:
+    input:
+        chrm_counts="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+        tRNA_counts="results/maturetRNA_statistics/{sample}_trnas.cdnacounts",
+        immature_tRNA_counts="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+        rRNA_counts="results/rRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+        restgenome_counts="results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts"
+    output:
+        final_counts="results/annotation_xlsites/{sample}.finalcounts"
+    params:
+        cluster= '-N 1 -c 1 --mem=30G -t 1:00:00'
+    shell:
+        "cat {input.chrm_counts} {input.restgenome_counts} {input.tRNA_counts} {input.immature_tRNA_counts} {input.rRNA_counts} > {output.final_counts}"
+
+rule annotateRepeats:
+    input:
+        xlsites="results/annotation_xlsites/{sample}.finalcounts",
+        annot="permanent_files/hg38_ucsc_repeatmask_filtered_merged.bed"
+    output:
+        overlap = "results/annotation_xlsites/{sample}.repbase_overlaps"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        bedtools intersect -a {input.xlsites} -b {input.annot} -wa -wb -loj -s > {output.overlap}
+        """
+
+rule annotateGenome:
+    input:
+        xlsites="results/annotation_xlsites/{sample}.repbase_overlaps",
+    output:
+        overlap = "results/annotation_xlsites/{sample}.genome_overlaps"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
+        annot = "../../results/segment/regions.gtf"
+    shell:
+        """
+        bedtools intersect -a {input.xlsites} -b {params.annot} -wa -wb -s > {output.overlap}
+        """
+
+
+rule cleanupAnnotation:
+    input:
+        genome="results/annotation_xlsites/{sample}.genome_overlaps",
+        all_counts="results/annotation_xlsites/{sample}.finalcounts",
+        small_rna_annot= "permanent_files/small_rna_annotation_final.txt",
+        rDNAannot="permanent_files/rDNA_annotation_final.txt"
+    output:
+        finalannotation="results/annotation_xlsites/{sample}.final_annotation"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    shell:
+        """
+        Rscript --vanilla scripts/mergeAnnotation.R {input.genome} {input.all_counts} {input.small_rna_annot} {input.rDNAannot} {output.finalannotation}
+        """
+
