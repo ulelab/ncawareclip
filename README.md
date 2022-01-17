@@ -1,6 +1,6 @@
 # ncawareclip
 iCLIP and miCLIP mapping pipeline to account for repetitive ncRNAs, especially snRNA, rRNA and tRNA.
-Currently available as a Snakemake pipeline.
+Currently available as a Snakemake pipeline. You need demultiplexed CLIP fastq files to begin - the code takes care of the rest.
 
 # Quick start
 
@@ -17,7 +17,7 @@ git clone https://github.com/ulelab/ncawareclip.git
 ```
 ```
 
-3. Create the full annotation/sequence databases you will need using the handy helper tool. Supported genomes are currently: "Hs", - human, "Mm", - mouse", Dm", - Drosophila, "Dr", - Zebrafish, "Rn", - rat, "Sc" - budding yeast (SacCer3) and "Sck1" - budding yeast (SK1, used in meiotic research).
+3. Create the full annotation/sequence databases you will need, and get your configuration file started using the handy helper tool. Supported genomes are currently: "Hs", - human, "Mm", - mouse", Dm", - Drosophila, "Dr", - Zebrafish, "Rn", - rat, "Sc" - budding yeast (SacCer3) and "Sck1" - budding yeast (SK1, used in meiotic research).
 ```
 ```
 
@@ -29,6 +29,7 @@ git clone https://github.com/ulelab/ncawareclip.git
 ```
 ```
 
+# The output
 
 # Notes on tRNAs
 
