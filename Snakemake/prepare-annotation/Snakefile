@@ -214,10 +214,10 @@ rule download_mature_trna:
         python ../../../scripts/deduplicate_fasta.py {params.basename_annot}
         echo "dedeuplication done"
         mv {params.dedup_report} ../../../{params.log}
-        python ../../../scripts/addPTMsTotRNA.py {params.basename_annot_dedup} mature_seqs.fa
+        python ../../../scripts/addPTMtotRNA.py {params.basename_annot_dedup} mature_seqs.fa
         echo "ptms added"
         pigz mature_seqs.fa
-        rm {params.annot}
+        rm {params.annot} {params.basename_annot_dedup}
         """
 
 # immature
