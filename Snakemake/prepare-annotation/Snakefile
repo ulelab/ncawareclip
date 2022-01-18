@@ -13,7 +13,7 @@ rule download_rRNA:
     threads:
         1
     params:
-        rRNA=config["big_rDNA_sequence"],
+        rRNA=config["rDNA_sequence"],
         outdir="results/rRNA/rRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
