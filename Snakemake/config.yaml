@@ -8,14 +8,19 @@ samples:
 # Files for index generation and mapping #
 
 # Sequences
-genome_index: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/results/genome_star_index
-genome_fai: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/GRCh38.primary_assembly.genome.fa.fai
-mitochondrial_genome: /camp/lab/luscomben/home/users/capitac/small_rna_index.2/human_chm_grch38gencode.fa
-MATURE_tRNAs: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/gtrnadb_data/hg38-tRNAs/hg38-tRNAs-mature.fa
-IMMATURE_tRNAs: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/gtrnadb_data/hg38-tRNAs/hg38-tRNAs-immature-deduplicated.fa
-
+rRNA_sequence: /camp/lab/luscomben/home/users/capitac/refs/Homo_sapiens_rRNA.fa
+rdna_annot: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/DDX3_iCLIP/permanent_files/rDNA_annotation_final.txt
+small_rna_annot: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/DDX3_iCLIP/permanent_files/small_rna_annotation_final.txt
+mature.tRNA_sequence: /camp/lab/luscomben/home/users/capitac/refs/gtrnadb_data/hg38-tRNAs/hg38-tRNAs-mature-deduplicated.fa
+immature.tRNA_sequence: /camp/lab/luscomben/home/users/capitac/refs/gtrnadb_data/hg38-tRNAs/hg38-tRNAs-immature-deduplicated.fa
+mature.snRNA_sequence: /camp/lab/luscomben/home/users/capitac/refs/snRNA/hg38_gencodev30_snRNA_ext1nt.fa
+immature.snRNA_sequence: /camp/lab/luscomben/home/users/capitac/refs/snRNA/hg38_gencodev30_snRNA_ext50nt.fa
+chrM_sequence: /camp/lab/luscomben/home/users/capitac/refs/human_chm_grch38gencode.fa
+genome_minuschrM_sequence: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/GRCh38.primary_assembly.genome_withoutchrM.fa
+repeatmasker: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/DDX3_iCLIP/permanent_files/hg38_ucsc_repeatmask_filtered_merged.bed
 
 # Annotation
 genome: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/GRCh38.primary_assembly.genome_withoutchrM.fa
 genome_fai: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/GRCh38.primary_assembly.genome_withoutchrM.fa.fai
-genome_gtf_file: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/gencode.v27.primary_assembly.annotation.gtf
+genome_annotation: /camp/lab/luscomben/home/users/capitac/spliceosome_iCLIP/permanent_files/gencode.v27.primary_assembly.annotation.gtf
+annot: /camp/lab/luscomben/home/users/capitac/hg38_regions/gencode.30.prim.regions.gtf

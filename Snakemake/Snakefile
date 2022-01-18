@@ -424,7 +424,7 @@ rule genomeMapreads:
         --readFilesIn {input.fastq} \
         --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
         --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
-        --outSAMattributes All --alignSJoverhangMin 100000000 --alignSJDBoverhangMin 1 --outFilterType BySJout \
+        --alignSJoverhangMin 100000000 --alignSJDBoverhangMin 1 --outFilterType BySJout \
         --alignIntronMin 20 --alignIntronMax 1000000 --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
          --outFilterMismatchNoverReadLmax 0.04
         mv {params.log} {output.logfolder}
@@ -509,7 +509,7 @@ rule getMerged:
 rule annotateRepeats:
     input:
         xlsites="results/annotation_xlsites/{sample}.finalcounts",
-        annot="permanent_files/hg38_ucsc_repeatmask_filtered_merged.bed"
+        annot=config["repeatmasker"]
     output:
         overlap = "results/annotation_xlsites/{sample}.repbase_overlaps"
     params:
@@ -537,8 +537,8 @@ rule cleanupAnnotation:
     input:
         genome="results/annotation_xlsites/{sample}.genome_overlaps",
         all_counts="results/annotation_xlsites/{sample}.finalcounts",
-        small_rna_annot= "permanent_files/small_rna_annotation_final.txt",
-        rDNAannot="permanent_files/rDNA_annotation_final.txt"
+        small_rna_annot=config["small_rna_annot"],
+        rDNAannot=config["rdna_annot"]
     output:
         finalannotation="results/annotation_xlsites/{sample}.final_annotation"
     params:
