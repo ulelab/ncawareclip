@@ -8,7 +8,7 @@ rule all:
         config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie.1.ebwt",
         config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt",
         config["species"]+"/full_genome/full_annot.gtf.gz",
-        config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa"
+        config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie.1.ebwt"
 
 
 # rDNA
@@ -171,6 +171,23 @@ rule immature_snRNA_sequences:
         bedtools getfasta -s -bed temp_flank50_snrna.bed -fi {params.genome_fa} -nameOnly > {output.fasta}
         pigz {params.genome_fa}
         rm temp_flank50_snrna.bed temp_snrna.bed
+        """
+
+rule immature_snRNA_bowtie_index:
+    input:
+        config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa"
+    threads:
+        4
+    params:
+        outdir=config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
+        log=config["species"]+"/logs"
+    output:
+        index=config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie.1.ebwt"
+    shell:
+        """
+        mkdir -p {params.log}
+        (bowtie-build {input} {params.outdir}) > {params.log}/all_immature_snRNA_bowtie.log
         """
 
 # tRNA
