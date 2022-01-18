@@ -12,14 +12,11 @@ f_file = open(new_file,"w")
 # Read the fasta file as a dictionary
 
 for f in fasta_sequences:
-    print(name)
-    print(sequence)
     name, sequence = f.id, f.seq
     sequence = str(sequence).upper()
     if sequence[-3:] != "CCA":
         sequence = sequence + "CCA"
     if name.find("His") != -1:
-        print(name)
         sequence = "G" + sequence
     f_file.write(">"+name+"\n"+sequence+"\n")
 
