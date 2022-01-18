@@ -44,10 +44,45 @@ rule rRNA_bowtie_index:
         (bowtie-build {input} {params.outdir}) > {params.log}/rRNA_bowtie.log
         """
 
-
-
 # snRNA
-# canonical snRNAs
+# canonical snRNAs canonical_snRNA_sequences
+rule download_canon_snRNA:
+    threads:
+        1
+    params:
+        snRNA=config["canonical_snRNA_sequences"],
+        outdir=config["species"]+"/snRNA/snRNA_sequences",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
+    output:
+        fasta=config["species"]+"/snRNA/snRNA_sequences/canonical_snRNA.fa"
+    shell:
+        """
+        cd {params.outdir}
+        datasets download gene symbol {params.snRNA}
+        unzip ncbi_dataset.zip
+        mv ncbi_dataset/data/rna.fna canonical_snRNA.fa
+        rm -r ncbi_dataset.zip ncbi_dataset README.md
+        """
+
+rule canon_snRNA_bowtie_index:
+    input:
+        config["species"]+"/snRNA/snRNA_sequences/canonical_snRNA.fa"
+    threads:
+        4
+    params:
+        outdir=config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
+        log=config["species"]+"/logs"
+    output:
+        index=config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie.1.ebwt"
+    shell:
+        """
+        mkdir -p {params.log}
+        (bowtie-build {input} {params.outdir}) > {params.log}/canonical_snRNA_bowtie.log
+        """
+
+
+
 # mature snRNAs all
 # immature snRNA (genomic flanks)
 
