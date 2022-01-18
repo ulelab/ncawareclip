@@ -1,6 +1,8 @@
 
 # The first rule in the document contains a list of all the deadend outputs expected
 # from the pipeline, that is, every output that isn't used in a subsequent rule.
+configfile:"species-specific-configs/Base_config.yaml"
+
 rule all:
     input:
         "results/rRNA/rRNA_sequences/rRNA.fa"

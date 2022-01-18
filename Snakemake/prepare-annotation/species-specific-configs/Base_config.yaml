@@ -1,0 +1,12 @@
+# Files for index generation and mapping #
+
+# Sequences
+big_rDNA_sequence: ""
+small_rDNA_sequence: ""
+mature_tRNA_sequence: ""
+mature_snRNA_sequence: ""
+canonical_snRNA_sequences: ""
+immature_tRNA_bed: ""
+genome_annotation: ""
+genome_sequence: ""
+
