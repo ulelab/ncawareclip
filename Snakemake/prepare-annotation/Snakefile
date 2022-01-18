@@ -9,7 +9,8 @@ rule all:
         config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt",
         config["species"]+"/full_genome/full_annot.gtf.gz",
         config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie.1.ebwt",
-        config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt"
+        config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt",
+        config["species"]+"/tRNA/tRNA_sequences/immature_seqs.fa"
 
 
 # rDNA
@@ -237,6 +238,33 @@ rule mature_tRNA_bowtie_index:
         """
 
 # immature
+rule download_immature_trna:
+    threads:
+        4
+    params:
+        annot=config["immature_tRNA_bed"],
+        basename_annot=os.path.basename(config["immature_tRNA_bed"]),
+        annot_folder=os.path.basename(config["immature_tRNA_bed"].replace(".tar.gz",""))
+        outdir=config["species"]+"/tRNA/tRNA_sequences",
+        genome_fa=config["species"]+"/full_genome/full_seq.fa",
+        genome_fai=config["species"]+"/full_genome/full_seq.fa.fai",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
+        log=config["species"]+"/logs"
+    output:
+        fasta=config["species"]+"/tRNA/tRNA_sequences/immature_seqs.fa"
+    shell:
+        """
+        cd {params.outdir}
+        wget {params.annot}
+        tar -xvzf {params.basename_annot}
+        mv {params.annot_folder}/{params.annot_folder}.bed {params.annot_folder}.bed
+        rm -r {params.basename_annot}
+        bedtools slop -i {params.annot_folder}.bed -b 50 -g {params.genome_fai} > temp_flank50_trna.bed
+        gunzip {params.genome_fa}.gz
+        bedtools getfasta -s -bed temp_flank50_trna.bed -fi {params.genome_fa} -nameOnly > {output.fasta}
+        pigz {params.genome_fa}
+        """
+
 
 
 # chrM
