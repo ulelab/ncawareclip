@@ -39,11 +39,11 @@ rule rRNA_bowtie_index:
         index=config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt"
     shell:
         """
-        bowtie-build {input.genome_fasta} {params.outdir}
+        bowtie-build {input} {params.outdir}
         """
 
 
-#ncbi_dataset/data/rna.fna
+
 # snRNA
 # canonical snRNAs
 # mature snRNAs all
