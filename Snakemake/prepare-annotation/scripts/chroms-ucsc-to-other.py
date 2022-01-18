@@ -4,7 +4,7 @@ import argparse
 import os
 
 
-MAPPINGS_DIR = '../chr_mappings'
+MAPPINGS_DIR = '../../../chr_mappings'
 MAPPINGS_FILES = {
     'Human_hg38': [
         'hg38_UCSC2Gencode.txt',
