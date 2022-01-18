@@ -6,7 +6,8 @@ rule all:
     input:
         config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt",
         config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie.1.ebwt",
-        config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt"
+        config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt",
+        config["species"]+"/full_genome_annotation/full_annot.gtf.gz"
 
 
 # rDNA
@@ -105,7 +106,6 @@ rule download_all_snRNA:
         rm {params.oneline_snRNA} {params.snRNA_file_unzipped}
         """
 
-
 rule all_snRNA_bowtie_index:
     input:
         config["species"]+"/snRNA/snRNA_sequences/all_snRNA.fa"
@@ -123,7 +123,23 @@ rule all_snRNA_bowtie_index:
         (bowtie-build {input} {params.outdir}) > {params.log}/all_snRNA_bowtie.log
         """
 
-
+# Download all annotation
+rule download_all_annotation:
+    threads:
+        1
+    params:
+        annot=config["genome_annotation"],
+        basename_annot=os.path.basename(config["genome_annotation"])
+        outdir=config["species"]+"/full_genome_annotation",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
+    output:
+        fasta=config["species"]+"/full_genome_annotation/full_annot.gtf.gz"
+    shell:
+        """
+        cd {params.outdir}
+        wget {params.annot}
+        mv {params.basename_annot} {output.fasta}
+        """
 # immature snRNA (genomic flanks)
 
 # tRNA
