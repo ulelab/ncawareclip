@@ -129,7 +129,7 @@ rule download_all_annotation:
         1
     params:
         annot=config["genome_annotation"],
-        basename_annot=os.path.basename(config["genome_annotation"])
+        basename_annot=os.path.basename(config["genome_annotation"]),
         outdir=config["species"]+"/full_genome_annotation",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
@@ -140,6 +140,7 @@ rule download_all_annotation:
         wget {params.annot}
         mv {params.basename_annot} {output.fasta}
         """
+
 # immature snRNA (genomic flanks)
 
 # tRNA
