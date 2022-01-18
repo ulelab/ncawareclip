@@ -9,7 +9,7 @@ rule all:
         config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt",
         config["species"]+"/full_genome/full_annot.gtf.gz",
         config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie.1.ebwt",
-        config["species"]+"/tRNA/tRNA_sequences/mature_seqs.fa.gz"
+        config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt"
 
 
 # rDNA
@@ -217,7 +217,24 @@ rule download_mature_trna:
         python ../../../scripts/addPTMtotRNA.py {params.basename_annot_dedup} mature_seqs.fa
         echo "ptms added"
         pigz mature_seqs.fa
-        rm {params.annot} {params.basename_annot_dedup}
+        rm {params.basename_annot} {params.basename_annot_dedup}
+        """
+
+rule mature_tRNA_bowtie_index:
+    input:
+        config["species"]+"/tRNA/tRNA_sequences/mature_seqs.fa.gz"
+    threads:
+        4
+    params:
+        outdir=config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
+        log=config["species"]+"/logs"
+    output:
+        index=config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt"
+    shell:
+        """
+        mkdir -p {params.log}
+        (bowtie-build {input} {params.outdir}) > {params.log}/all_tRNA_bowtie.log
         """
 
 # immature
