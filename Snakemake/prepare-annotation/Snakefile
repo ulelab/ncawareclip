@@ -20,11 +20,11 @@ rule download_rRNA:
         index="results/rRNA/rRNA_sequences/rRNA.fa"
     shell:
         """
+        cd {params.outdir}
         datasets download gene symbol {params.rRNA}
-        mv ncbi_dataset.zip {params.outdir}
-        unzip {params.outdir}/ncbi_dataset.zip
-        mv {params.outdir}/ncbi_dataset/data/rna.fna {params.outdir}/rRNA.fa
-        rm -r {params.outdir}/ncbi_dataset.zip {params.outdir}/ncbi_dataset
+        unzip ncbi_dataset.zip
+        mv ncbi_dataset/data/rna.fna rRNA.fa
+        rm -r ncbi_dataset.zip ncbi_dataset
         """
 
 #ncbi_dataset/data/rna.fna
