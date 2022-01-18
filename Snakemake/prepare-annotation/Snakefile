@@ -105,13 +105,33 @@ rule download_all_snRNA:
         rm {params.oneline_snRNA} {params.snRNA_file_unzipped}
         """
 
+
+rule all_snRNA_bowtie_index:
+    input:
+        config["species"]+"/snRNA/snRNA_sequences/all_snRNA.fa"
+    threads:
+        4
+    params:
+        outdir=config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
+        log=config["species"]+"/logs"
+    output:
+        index=config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt"
+    shell:
+        """
+        mkdir -p {params.log}
+        (bowtie-build {input} {params.outdir}) > {params.log}/all_snRNA_bowtie.log
+        """
+
+
 # immature snRNA (genomic flanks)
 
 # tRNA
 
 
-
 # chrM
+
+
 
 # genome minus chrM
 
