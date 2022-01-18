@@ -1,5 +1,7 @@
 # Files for index generation and mapping #
 
+species: "Human_hg38"
+
 # Sequences
 rDNA_sequence: "--taxon human RNA45SN1,RNA5S1"
 mature_tRNA_sequence: http://gtrnadb.ucsc.edu/GtRNAdb2/genomes/eukaryota/Hsapi38/hg38-mature-tRNAs.fa

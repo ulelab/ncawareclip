@@ -14,17 +14,17 @@ rule download_rRNA:
         1
     params:
         rRNA=config["rDNA_sequence"],
-        outdir="results/rRNA/rRNA_sequences",
+        outdir=config["species"]+"/rRNA/rRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
-        index="results/rRNA/rRNA_sequences/rRNA.fa"
+        index=config["species"]+"/rRNA/rRNA_sequences/rRNA.fa"
     shell:
         """
         cd {params.outdir}
         datasets download gene symbol {params.rRNA}
         unzip ncbi_dataset.zip
         mv ncbi_dataset/data/rna.fna rRNA.fa
-        rm -r ncbi_dataset.zip ncbi_dataset
+        rm -r ncbi_dataset.zip ncbi_dataset README.md
         """
 
 #ncbi_dataset/data/rna.fna
