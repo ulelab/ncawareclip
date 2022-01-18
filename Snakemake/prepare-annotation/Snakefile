@@ -86,7 +86,7 @@ rule download_all_snRNA:
         1
     params:
         snRNA=config["mature_snRNA_sequence"],
-        oneline_snRNA=config["mature_snRNA_sequence"].replace(".fa",".oneline.fa"),
+        oneline_snRNA=config["mature_snRNA_sequence"].replace(".fa.gz",".oneline.fa"),
         outdir=config["species"]+"/snRNA/snRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
@@ -95,9 +95,9 @@ rule download_all_snRNA:
         """
         cd {params.outdir}
         wget {params.snRNA}
-        gunzip {params.snRNA}
+        basename {params.snRNA} | gunzip
         ./scripts/makeFastaOneLine.sh
-        grep -w -A 1 snRNA {params.oneline_snRNA} --no-group-separator > all_snRNA.fa
+        basename {params.oneline_snRNA} | grep -w -A 1 snRNA --no-group-separator > all_snRNA.fa
         """
 
 # immature snRNA (genomic flanks)
