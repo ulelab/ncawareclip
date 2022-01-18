@@ -244,7 +244,7 @@ rule download_immature_trna:
     params:
         annot=config["immature_tRNA_bed"],
         basename_annot=os.path.basename(config["immature_tRNA_bed"]),
-        annot_folder=os.path.basename(config["immature_tRNA_bed"].replace(".tar.gz",""))
+        annot_folder=os.path.basename(config["immature_tRNA_bed"].replace(".tar.gz","")),
         outdir=config["species"]+"/tRNA/tRNA_sequences",
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
         genome_fai=config["species"]+"/full_genome/full_seq.fa.fai",
