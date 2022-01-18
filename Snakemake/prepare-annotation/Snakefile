@@ -5,7 +5,7 @@ configfile:"species-specific-configs/Base_config.yaml"
 
 rule all:
     input:
-        "results/rRNA/rRNA_sequences/rRNA.fa"
+        config["species"]+"/rRNA/rRNA_sequences/rRNA.fa"
 
 
 # rDNA
@@ -17,7 +17,7 @@ rule download_rRNA:
         outdir=config["species"]+"/rRNA/rRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
-        index=config["species"]+"/rRNA/rRNA_sequences/rRNA.fa"
+        fasta=config["species"]+"/rRNA/rRNA_sequences/rRNA.fa"
     shell:
         """
         cd {params.outdir}
