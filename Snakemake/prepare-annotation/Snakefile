@@ -40,7 +40,7 @@ rule rRNA_bowtie_index:
         index=config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt"
     shell:
         """
-        mkdir {params.log}
+        mkdir -p {params.log}
         (bowtie-build {input} {params.outdir}) > {params.log}/rRNA_bowtie.log
         """
 
