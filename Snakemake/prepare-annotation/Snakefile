@@ -263,7 +263,7 @@ rule download_immature_trna:
         python ../../../scripts/chroms-ucsc-to-other.py --infile {params.annot_folder}.bed --outfile {params.annot_folder}.Gencode.bed --species {params.species}
         bedtools slop -i {params.annot_folder}.Gencode.bed -b 50 -g ../../../{params.genome_fai} | cut -f1,2,3,4,5,6 > temp_flank50_trna.bed
         gunzip ../../../{params.genome_fa}.gz
-        bedtools getfasta -s -bed temp_flank50_trna.bed -fi ../../../{params.genome_fa} -nameOnly > {output.fasta}
+        bedtools getfasta -s -bed temp_flank50_trna.bed -fi ../../../{params.genome_fa} -nameOnly > immature_seqs.fa
         pigz ../../../{params.genome_fa}
         rm temp*
         """
