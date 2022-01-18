@@ -164,7 +164,7 @@ rule immature_snRNA_sequences:
         fasta=config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa"
     shell:
         """
-        zcat {input} | grep snRNA | awk '$3 == "gene"' | awk '{print $1 "\t" $4 "\t" $5 "\t" $10 "\t.\t" $7}' \
+        zcat {input} | grep snRNA | awk '$3 == "gene"' | awk '{{print $1 "\\t" $4 "\\t" $5 "\\t" $10 "\\t.\\t" $7}}' \
         | sed s'/"//g' | sed s'/;//g' > temp_snrna.bed
         bedtools slop -i temp_snrna.bed -b 50 -g {params.genome_fai} > temp_flank50_snrna.bed
         gunzip {params.genome_fa}.gz
