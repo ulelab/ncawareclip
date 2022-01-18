@@ -10,18 +10,17 @@ rule all:
 
 # rDNA
 rule download_rRNA:
-    input:
-        rRNA=config["big_rDNA_sequence"]
     threads:
         1
     params:
+        rRNA=config["big_rDNA_sequence"]
         outdir="results/rRNA/rRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
         index="results/rRNA/rRNA_sequences/rRNA.fa"
     shell:
         """
-        datasets download gene symbol {input.rRNA}
+        datasets download gene symbol {params.rRNA}
         mv ncbi_dataset.zip {params.outdir}
         unzip {params.outdir}/ncbi_dataset.zip
         mv {params.outdir}/ncbi_dataset/data/rna.fna {params.outdir}/rRNA.fa
