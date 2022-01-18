@@ -295,22 +295,22 @@ rule get_repeats:
         annot=config["repeats"],
         basename_annot=os.path.basename(config["repeats"]),
         basename_annot_tot=os.path.basename(config["repeats"]).replace(".txt.gz",""),
-        outdir=config["species"]+"/repeats",
+        outdir=config["species"]+"/repeats/repeat_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
         log=config["species"]+"/logs"
     output:
-        fasta=config["species"]+"/repeats/repeats.fa"
+        fasta=config["species"]+"/repeats/repeat_sequences/repeats.fa"
     shell:
         """
         cd {params.outdir}
         wget {params.annot}
         gunzip {params.basename_annot}
         awk '{{print $2 "\\t" $3 "\\t" $4 "\\t" $16 ";" $5 "\\t.\\t" $7}}' {params.basename_annot_tot}.txt | sed s'/?//g' > repeats.bed
-        python ../../scripts/chroms-ucsc-to-other.py --infile repeats.bed --outfile repeats.Gencode.bed --species {params.species}
-        gunzip ../../{params.genome_fa}.gz
-        bedtools getfasta -s -bed repeats.Gencode.bed -fi ../../{params.genome_fa} -nameOnly > repeats.fa
-        pigz ../../{params.genome_fa}
+        python ../../../scripts/chroms-ucsc-to-other.py --infile repeats.bed --outfile repeats.Gencode.bed --species {params.species}
+        gunzip ../../../{params.genome_fa}.gz
+        bedtools getfasta -s -bed repeats.Gencode.bed -fi ../../../{params.genome_fa} -nameOnly > repeats.fa
+        pigz ../../../{params.genome_fa}
         rm *bed *txt
         """
 
