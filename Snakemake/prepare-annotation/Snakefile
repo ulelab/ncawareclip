@@ -7,7 +7,8 @@ rule all:
         config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt",
         config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie.1.ebwt",
         config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt",
-        config["species"]+"/full_genome/full_annot.gtf.gz"
+        config["species"]+"/full_genome/full_annot.gtf.gz",
+        config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa"
 
 
 # rDNA
@@ -155,14 +156,19 @@ rule immature_snRNA_sequences:
     threads:
         1
     params:
+        genome_fa=config["species"]+"/full_genome/full_seq.fa",
+        genome_fai=config["species"]+"/full_genome/full_seq.fa.fai",
         outdir=config["species"]+"/snRNA/snRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
         fasta=config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa"
     shell:
         """
-        zcat {input} | grep snRNA | awk '$3 == "gene"' | awk '{print $1 "\t" $4 "\t" $5 "\t.\t.\t" $7}' > temp_snrna.bed
-        bedtools slop -i temp_snrna.bed -b 50 -g
+        zcat {input} | grep snRNA | awk '$3 == "gene"' | awk '{print $1 "\t" $4 "\t" $5 "\t" $10 "\t.\t" $7}' \
+        | sed s'/"//g' | sed s'/;//g' > temp_snrna.bed
+        bedtools slop -i temp_snrna.bed -b 50 -g {params.genome_fai} > temp_flank50_snrna.bed
+        gunzip {params.genome_fa}.gz
+        bedtools getfasta -s -bed temp_flank50_snrna.bed -fi {params.genome_fa} > {output.fasta}
         """
 
 # tRNA
