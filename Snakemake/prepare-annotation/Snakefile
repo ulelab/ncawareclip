@@ -11,7 +11,7 @@ rule all:
         config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie.1.ebwt",
         config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt",
         config["species"]+"/tRNA/all_immature_tRNA_index/all_immature_tRNA_bowtie.1.ebwt",
-        config["species"]+"/repeats/repeats.fa"
+        config["species"]+"/repeats/repeat_sequences/repeats.fa"
 
 
 # rDNA
