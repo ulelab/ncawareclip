@@ -254,6 +254,7 @@ rule download_immature_trna:
         fasta=config["species"]+"/tRNA/tRNA_sequences/immature_seqs.fa"
     shell:
         """
+        shopt -s extglob
         cd {params.outdir}
         wget {params.annot}
         tar -xvzf {params.basename_annot}
