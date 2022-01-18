@@ -7,7 +7,7 @@ rule all:
         config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt",
         config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie.1.ebwt",
         config["species"]+"/snRNA/all_snRNA_index/all_snRNA_bowtie.1.ebwt",
-        config["species"]+"/full_genome_annotation/full_annot.gtf.gz"
+        config["species"]+"/full_genome/full_annot.gtf.gz"
 
 
 # rDNA
