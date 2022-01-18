@@ -11,7 +11,7 @@ rule all:
         config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie.1.ebwt",
         config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt",
         config["species"]+"/tRNA/all_immature_tRNA_index/all_immature_tRNA_bowtie.1.ebwt",
-        config["species"]+"/repeats/repeat_sequences/repeats.fa"
+        config["species"]+"/repeats/repeats_index/repeats_bowtie.1.ebwt"
 
 
 # rDNA
@@ -312,6 +312,25 @@ rule get_repeats:
         bedtools getfasta -s -bed repeats.Gencode.bed -fi ../../../{params.genome_fa} -nameOnly > repeats.fa
         pigz ../../../{params.genome_fa}
         rm *bed *txt
+        """
+
+# repeats index
+
+rule repeats_bowtie_index:
+    input:
+        config["species"]+"/repeats/repeat_sequences/repeats.fa"
+    threads:
+        4
+    params:
+        outdir=config["species"]+"/repeats/repeats_index/repeats_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
+        log=config["species"]+"/logs"
+    output:
+        index=config["species"]+"/repeats/repeats_index/repeats_bowtie.1.ebwt"
+    shell:
+        """
+        mkdir -p {params.log}
+        (bowtie-build {input} {params.outdir}) > {params.log}/repeats_bowtie.log
         """
 
 # chrM
