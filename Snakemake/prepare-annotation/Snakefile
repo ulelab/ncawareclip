@@ -95,7 +95,7 @@ rule download_all_snRNA:
         """
         cd {params.outdir}
         wget {params.snRNA}
-        basename {params.snRNA} | gunzip
+        basename {params.snRNA} | gunzip -
         ./scripts/makeFastaOneLine.sh
         basename {params.oneline_snRNA} | grep -w -A 1 snRNA --no-group-separator > all_snRNA.fa
         """
