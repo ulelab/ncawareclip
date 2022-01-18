@@ -1,0 +1,42 @@
+
+# The first rule in the document contains a list of all the deadend outputs expected
+# from the pipeline, that is, every output that isn't used in a subsequent rule.
+rule all:
+    input:
+        "results/rRNA/rRNA_sequences/rRNA.fa"
+
+
+# rDNA
+rule download_rRNA:
+    input:
+        rRNA=config["big_rDNA_sequence"]
+    threads:
+        1
+    params:
+        outdir="results/rRNA/rRNA_sequences",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
+    output:
+        index="results/rRNA/rRNA_sequences/rRNA.fa"
+    shell:
+        """
+        datasets download gene symbol {input.rRNA}
+        mv ncbi_dataset.zip {params.outdir}
+        unzip {params.outdir}/ncbi_dataset.zip
+        mv {params.outdir}/ncbi_dataset/data/rna.fna {params.outdir}/rRNA.fa
+        rm -r {params.outdir}/ncbi_dataset.zip {params.outdir}/ncbi_dataset
+        """
+
+#ncbi_dataset/data/rna.fna
+# snRNA
+# canonical snRNAs
+# mature snRNAs all
+# immature snRNA (genomic flanks)
+
+# tRNA
+
+
+
+# chrM
+
+# genome minus chrM
+
