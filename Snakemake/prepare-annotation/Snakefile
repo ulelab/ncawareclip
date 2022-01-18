@@ -35,11 +35,12 @@ rule rRNA_bowtie_index:
     params:
         outdir=config["species"]+"/rRNA/rRNA_index/rRNA_bowtie",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
+        log=config["species"]+"/logs"
     output:
         index=config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt"
     shell:
         """
-        bowtie-build {input} {params.outdir}
+        bowtie-build {input} {params.outdir} >& {params.log}/rRNA_bowtie.log
         """
 
 
