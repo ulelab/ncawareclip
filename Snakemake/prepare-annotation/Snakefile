@@ -5,7 +5,7 @@ configfile:"species-specific-configs/Base_config.yaml"
 
 rule all:
     input:
-        config["species"]+"/rRNA/rRNA_sequences/rRNA.fa"
+        config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt"
 
 
 # rDNA
@@ -26,6 +26,22 @@ rule download_rRNA:
         mv ncbi_dataset/data/rna.fna rRNA.fa
         rm -r ncbi_dataset.zip ncbi_dataset README.md
         """
+
+rule rRNA_bowtie_index:
+    input:
+        config["species"]+"/rRNA/rRNA_sequences/rRNA.fa"
+    threads:
+        4
+    params:
+        outdir=config["species"]+"/rRNA/rRNA_index/rRNA_bowtie",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
+    output:
+        index=config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt"
+    shell:
+        """
+        bowtie-build {input.genome_fasta} {params.outdir}
+        """
+
 
 #ncbi_dataset/data/rna.fna
 # snRNA
