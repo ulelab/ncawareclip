@@ -138,7 +138,7 @@ rule download_all_annotation:
         """
         cd {params.outdir}
         wget {params.annot}
-        mv {params.basename_annot} {output.fasta}
+        mv {params.basename_annot} full_annot.gtf.gz
         """
 
 # immature snRNA (genomic flanks)
