@@ -129,19 +129,39 @@ rule download_all_annotation:
         1
     params:
         annot=config["genome_annotation"],
+        seq=config["genome_sequence"],
         basename_annot=os.path.basename(config["genome_annotation"]),
-        outdir=config["species"]+"/full_genome_annotation",
+        basename_seq=os.path.basename(config["genome_sequence"]),
+        outdir=config["species"]+"/full_genome",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
-        fasta=config["species"]+"/full_genome_annotation/full_annot.gtf.gz"
+        fasta=config["species"]+"/full_genome/full_annot.gtf.gz"
     shell:
         """
         cd {params.outdir}
         wget {params.annot}
+        wget {params.seq}
         mv {params.basename_annot} full_annot.gtf.gz
+        mv {params.basename_seq} full_seq.fa.gz
+        samtools faidx full_seq.fa.gz
         """
 
 # immature snRNA (genomic flanks)
+rule immature_snRNA_sequences:
+    input:
+        config["species"]+"/full_genome/full_annot.gtf.gz"
+    threads:
+        1
+    params:
+        outdir=config["species"]+"/snRNA/snRNA_sequences",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
+    output:
+        fasta=config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa"
+    shell:
+        """
+        zcat {input} | grep snRNA | awk '$3 == "gene"' | awk '{print $1 "\t" $4 "\t" $5 "\t.\t.\t" $7}' > temp_snrna.bed
+        bedtools slop -i temp_snrna.bed -b 50 -g
+        """
 
 # tRNA
 
