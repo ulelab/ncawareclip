@@ -265,7 +265,7 @@ rule download_immature_trna:
         gunzip ../../../{params.genome_fa}.gz
         bedtools getfasta -s -bed temp_flank50_trna.bed -fi ../../../{params.genome_fa} -nameOnly > immature_seqs.fa
         pigz ../../../{params.genome_fa}
-        rm temp*
+        rm *bed
         """
 
 
