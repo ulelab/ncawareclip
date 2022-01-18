@@ -170,6 +170,7 @@ rule immature_snRNA_sequences:
         gunzip {params.genome_fa}.gz
         bedtools getfasta -s -bed temp_flank50_snrna.bed -fi {params.genome_fa} -nameOnly > {output.fasta}
         gzip {params.genome_fa}
+        rm temp_flank50_snrna.bed temp_snrna.bed
         """
 
 # tRNA
