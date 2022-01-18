@@ -206,7 +206,7 @@ rule download_mature_trna:
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
         log=config["species"]+"/logs"
     output:
-        fasta=config["species"]+"/tRNA/tRNA_sequences/mature_seqs.fa.gz"
+        fasta=config["species"]+"/tRNA/tRNA_sequences/mature_seqs.fa"
     shell:
         """
         cd {params.outdir}
@@ -216,13 +216,12 @@ rule download_mature_trna:
         mv {params.dedup_report} ../../../{params.log}
         python ../../../scripts/addPTMtotRNA.py {params.basename_annot_dedup} mature_seqs.fa
         echo "ptms added"
-        pigz mature_seqs.fa
         rm {params.basename_annot} {params.basename_annot_dedup}
         """
 
 rule mature_tRNA_bowtie_index:
     input:
-        config["species"]+"/tRNA/tRNA_sequences/mature_seqs.fa.gz"
+        config["species"]+"/tRNA/tRNA_sequences/mature_seqs.fa"
     threads:
         4
     params:
