@@ -3,7 +3,8 @@ configfile:"species-specific-configs/Base_config.yaml"
 rule all:
     input:
         config["species"]+"/rRNA/rRNA_index/rRNA_bowtie.1.ebwt",
-        config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie.1.ebwt"
+        config["species"]+"/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie.1.ebwt",
+        config["species"]+"/snRNA/snRNA_sequences/all_snRNA.fa"
 
 
 # rDNA
@@ -79,9 +80,26 @@ rule canon_snRNA_bowtie_index:
         (bowtie-build {input} {params.outdir}) > {params.log}/canonical_snRNA_bowtie.log
         """
 
-
-
 # mature snRNAs all
+rule download_all_snRNA:
+    threads:
+        1
+    params:
+        snRNA=config["mature_snRNA_sequence"],
+        oneline_snRNA=config["mature_snRNA_sequence"].replace(".fa",".oneline.fa")
+        outdir=config["species"]+"/snRNA/snRNA_sequences",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
+    output:
+        fasta=config["species"]+"/snRNA/snRNA_sequences/all_snRNA.fa"
+    shell:
+        """
+        cd {params.outdir}
+        wget {params.snRNA}
+        gunzip {params.snRNA}
+        ./scripts/makeFastaOneLine.sh
+        grep -w -A 1 snRNA {params.oneline_snRNA} --no-group-separator > all_snRNA.fa
+        """
+
 # immature snRNA (genomic flanks)
 
 # tRNA
