@@ -127,7 +127,7 @@ rule all_snRNA_bowtie_index:
 # Download all annotation
 rule download_all_annotation:
     threads:
-        1
+        4
     params:
         annot=config["genome_annotation"],
         seq=config["genome_sequence"],
@@ -146,7 +146,7 @@ rule download_all_annotation:
         mv {params.basename_seq} full_seq.fa.gz
         gunzip full_seq.fa.gz
         samtools faidx full_seq.fa
-        gzip full_seq.fa
+        pigz full_seq.fa
         """
 
 # immature snRNA (genomic flanks)
@@ -154,7 +154,7 @@ rule immature_snRNA_sequences:
     input:
         config["species"]+"/full_genome/full_annot.gtf.gz"
     threads:
-        1
+        4
     params:
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
         genome_fai=config["species"]+"/full_genome/full_seq.fa.fai",
@@ -169,7 +169,7 @@ rule immature_snRNA_sequences:
         bedtools slop -i temp_snrna.bed -b 50 -g {params.genome_fai} > temp_flank50_snrna.bed
         gunzip {params.genome_fa}.gz
         bedtools getfasta -s -bed temp_flank50_snrna.bed -fi {params.genome_fa} -nameOnly > {output.fasta}
-        gzip {params.genome_fa}
+        pigz {params.genome_fa}
         rm temp_flank50_snrna.bed temp_snrna.bed
         """
 
