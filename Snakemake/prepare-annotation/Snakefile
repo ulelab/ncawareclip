@@ -145,7 +145,7 @@ rule download_all_annotation:
         mv {params.basename_seq} full_seq.fa.gz
         gunzip full_seq.fa.gz
         samtools faidx full_seq.fa
-        gzip full_seq.faß
+        gzip full_seq.fa
         """
 
 # immature snRNA (genomic flanks)
