@@ -286,12 +286,6 @@ rule immature_tRNA_bowtie_index:
         (bowtie-build {input} {params.outdir}) > {params.log}/all_immature_tRNA_bowtie.log
         """
 
-# chrM
-
-
-# genome minus chrM
-
-
 # repbase
 rule get_repeats:
     threads:
@@ -313,9 +307,14 @@ rule get_repeats:
         wget {params.annot}
         gunzip {params.basename_annot}
         awk '{{print $2 "\\t" $3 "\\t" $4 "\\t" $16 ";" $5 "\\t.\\t" $7}}' {params.basename_annot_tot}.txt | sed s'/?//g' > repeats.bed
-        python ../../../scripts/chroms-ucsc-to-other.py --infile repeats.bed --outfile repeats.Gencode.bed --species {params.species}
-        gunzip ../../../{params.genome_fa}.gz
-        bedtools getfasta -s -bed repeats.Gencode.bed -fi ../../../{params.genome_fa} -nameOnly > repeats.fa
-        pigz ../../../{params.genome_fa}
+        python ../../scripts/chroms-ucsc-to-other.py --infile repeats.bed --outfile repeats.Gencode.bed --species {params.species}
+        gunzip ../../{params.genome_fa}.gz
+        bedtools getfasta -s -bed repeats.Gencode.bed -fi ../../{params.genome_fa} -nameOnly > repeats.fa
+        pigz ../../{params.genome_fa}
         rm *bed *txt
         """
+
+# chrM
+
+
+# genome minus chrM
