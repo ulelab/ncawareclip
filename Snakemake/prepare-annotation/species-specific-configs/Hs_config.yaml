@@ -6,9 +6,9 @@ species: "Human_hg38"
 rDNA_sequence: "--taxon human RNA45SN1,RNA5S1"
 canonical_snRNA_sequences: "--taxon human RNU1-1,RNU2-1,RNU4-1,RNU5A-1,RNU6-1"
 mature_tRNA_sequence: http://gtrnadb.ucsc.edu/GtRNAdb2/genomes/eukaryota/Hsapi38/hg38-mature-tRNAs.fa
-mature_snRNA_sequence: ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_27/gencode.v27.transcripts.fa.gz
+mature_snRNA_sequence: ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_39/gencode.v39.transcripts.fa.gz
 
 immature_tRNA_bed: ""
-genome_annotation: ""
+genome_annotation: "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_39/gencode.v39.primary_assembly.annotation.gtf.gz"
 genome_sequence: ""
 
