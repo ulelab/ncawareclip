@@ -11,10 +11,13 @@ git clone https://github.com/ulelab/ncawareclip.git
 
 2. Move into the newly downloaded directory, and create a conda environment with all the dependencies you will require.
 ```
+cd ncawareclip
+conda env create -f environment.yml
 ```
 
 3. Run the test data to make sure everything is working.
 ```
+conda activate ncawareclip
 ```
 
 3. Create the full annotation/sequence databases you will need, and get your configuration file started using the handy helper tool. Supported genomes are currently: "Hs", - human, "Mm", - mouse", Dm", - Drosophila, "Dr", - Zebrafish, "Rn", - rat, "Sc" - budding yeast (SacCer3) and "Sck1" - budding yeast (SK1, used in meiotic research). Note: you only need to run this once for each species you analyse. Note2: in this pipeline all annotation origins and processing code is all in this repo, so certain files could be replaced if you wanted.
