@@ -21,7 +21,16 @@ conda activate ncawareclip
 ```
 
 3. Create the full annotation/sequence databases you will need, and get your configuration file started using the handy helper tool. Supported genomes are currently: "Hs", - human, "Mm", - mouse", Dm", - Drosophila, "Dr", - Zebrafish, "Rn", - rat, "Sc" - budding yeast (SacCer3) and "Sck1" - budding yeast (SK1, used in meiotic research). Note: you only need to run this once for each species you analyse. Note2: in this pipeline all annotation origins and processing code is all in this repo, so certain files could be replaced if you wanted.
+
+For example, to create all the annotation indexes you'll need for human mapping, run:
 ```
+cd Snakemake/prepare-annotation
+snakemake --configfile species-specific-configs/Hs_config.yaml
+```
+
+To use the SLURM cluster settings and submit your jobs to a SLURM compute cluster, use extra flags in your snakemake command:
+```
+snakemake --keep-going --cluster 'sbatch {params.cluster}' --jobs 200 --latency-wait 60 --rerun-incomplete --configfile species-specific-configs/Hs_config.yaml
 ```
 
 4. Edit `config.yaml` to provide paths to your demultiplexed fastq files and path where you are running the pipeline. For UMI removal make sure that the random barcode is moved to the fastq header as "RBC:NNNNN". I would highly recommend the speedy demultiplexer [Ultraplex](https://github.com/ulelab/ultraplex) for completely unbiased reasons.
