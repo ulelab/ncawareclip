@@ -257,12 +257,12 @@ rule download_immature_trna:
         cd {params.outdir}
         wget {params.annot}
         tar -xvzf {params.basename_annot}
-        mv {params.annot_folder}/{params.annot_folder}.bed {params.annot_folder}.bed
-        rm -r {params.basename_annot}
+        rm -v !("mature_seqs.fa"|"{params.annot_folder}.bed")
         bedtools slop -i {params.annot_folder}.bed -b 50 -g {params.genome_fai} > temp_flank50_trna.bed
         gunzip {params.genome_fa}.gz
         bedtools getfasta -s -bed temp_flank50_trna.bed -fi {params.genome_fa} -nameOnly > {output.fasta}
         pigz {params.genome_fa}
+        rm temp*
         """
 
 
