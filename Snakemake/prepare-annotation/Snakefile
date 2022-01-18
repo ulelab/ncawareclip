@@ -143,7 +143,9 @@ rule download_all_annotation:
         wget {params.seq}
         mv {params.basename_annot} full_annot.gtf.gz
         mv {params.basename_seq} full_seq.fa.gz
-        samtools faidx full_seq.fa.gz
+        gunzip full_seq.fa.gz
+        samtools faidx full_seq.fa
+        gzip full_seq.faß
         """
 
 # immature snRNA (genomic flanks)
