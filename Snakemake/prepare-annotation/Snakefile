@@ -367,7 +367,7 @@ rule split_mito:
 # index genome files
 rule genomeSTARindex:
     input:
-        genome_fasta="genome_minus_mito.fa.gz",
+        genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz",
         gtf=config["species"]+"/full_genome/full_annot.gtf.gz"
     threads:
         8
@@ -389,7 +389,7 @@ rule genomeSTARindex:
 # index mito file
 rule mitoSTARindex:
     input:
-        genome_fasta="mito.fa.gz",
+        genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa.gz",
         gtf=config["species"]+"/full_genome/full_annot.gtf.gz"
     threads:
         8
