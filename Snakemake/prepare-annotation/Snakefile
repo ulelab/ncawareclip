@@ -351,7 +351,6 @@ rule split_mito:
     shell:
         """
         cd {params.outdir}
-        wget {params.annot}
         gunzip ../../../{params.genome_fa}.gz
         samtools faidx ../../../{params.genome_fa} {params.mito_name} > mito.fa
         samtools faidx mito.fa
