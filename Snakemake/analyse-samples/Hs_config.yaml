@@ -9,4 +9,7 @@ samples:
 rRNA_index: ../prepare-annotation/Human_hg38/rRNA/rRNA_index/rRNA_bowtie
 mature_tRNA_index: ../prepare-annotation/Human_hg38/tRNA/all_tRNA_index/all_tRNA_bowtie
 immature_tRNA_index: ../prepare-annotation/Human_hg38/tRNA/all_immature_tRNA_index/all_immature_tRNA_bowtie
-mature_snRNA_index: 
+mature_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/all_snRNA_index/all_snRNA_bowtie
+immature_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie
+canonical_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie
+mito_index: ../prepare-annotation/Human_hg38/mito_separated/Mito_star_index

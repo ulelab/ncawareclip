@@ -12,7 +12,6 @@ rule all:
         config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt",
         config["species"]+"/tRNA/all_immature_tRNA_index/all_immature_tRNA_bowtie.1.ebwt",
         config["species"]+"/repeats/repeats_index/repeats_bowtie.1.ebwt",
-        config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz",
         config["species"]+"/mito_separated/genomeMinusMito_star_index/exonInfo.tab",
         config["species"]+"/mito_separated/Mito_star_index/exonInfo.tab"
 
@@ -348,7 +347,7 @@ rule split_mito:
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
         log=config["species"]+"/logs"
     output:
-        fasta=config["species"]+"//mito_separated/mito_separated_sequences/mito.fa.gz",
+        fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa.gz",
         other_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz"
     shell:
         """
