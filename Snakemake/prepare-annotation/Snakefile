@@ -367,8 +367,10 @@ rule split_mito:
 # index genome files
 rule genomeSTARindex:
     input:
-        genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa",
-        gtf=config["species"]+"/full_genome/full_annot.gtf"
+        genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz",
+        gtf=config["species"]+"/full_genome/full_annot.gtf.gz"
+        unzip_genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa",
+        unzip_gtf=config["species"]+"/full_genome/full_annot.gtf"
     threads:
         8
     params:
@@ -382,19 +384,21 @@ rule genomeSTARindex:
         gunzip {params.gtf}.gz
         STAR --runThreadN {threads} \
         --runMode genomeGenerate --genomeDir {params.outdir} \
-        --genomeFastaFiles {input.genome_fasta} --sjdbGTFfile {input.gtf} \
+        --genomeFastaFiles {input.unzip_genome_fasta} --sjdbGTFfile {input.unzip_gtf} \
         --outFileNamePrefix {params.outdir} \
         --sjdbOverhang 49
-        pigz {params.genome_fasta}
-        pigz {params.gtf}
+        pigz {params.unzip_genome_fasta}
+        pigz {params.unzip_gtf}
         """
 
         
 # index mito file
 rule mitoSTARindex:
     input:
-        genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa",
-        gtf=config["species"]+"/full_genome/full_annot.gtf"
+        genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa.gz",
+        unzip_genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa",
+        gtf=config["species"]+"/full_genome/full_annot.gtf.gz",
+        unzip_gtf=config["species"]+"/full_genome/full_annot.gtf"
     threads:
         8
     params:
@@ -408,9 +412,9 @@ rule mitoSTARindex:
         gunzip {params.gtf}.gz
         STAR --runThreadN {threads} \
         --runMode genomeGenerate --genomeDir {params.outdir} \
-        --genomeFastaFiles {input.genome_fasta} --sjdbGTFfile {input.gtf} \
+        --genomeFastaFiles {input.unzip_genome_fasta} --sjdbGTFfile {input.unzip_gtf} \
         --outFileNamePrefix {params.outdir} \
         --sjdbOverhang 49
-        pigz {params.genome_fasta}
-        pigz {params.gtf}
+        pigz {params.unzip_genome_fasta}
+        pigz {params.unzip_gtf}
         """
