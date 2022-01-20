@@ -481,32 +481,32 @@ rule getMerged:
 #         bedtools intersect -a {input.xlsites} -b {input.annot} -wa -wb -loj -s > {output.overlap}
 #         """
 
-rule annotateGenome:
-    input:
-        xlsites="results/annotation_xlsites/{sample}.repbase_overlaps",
-    output:
-        overlap = "results/annotation_xlsites/{sample}.genome_overlaps"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
-        annot = "../../results/segment/regions.gtf"
-    shell:
-        """
-        bedtools intersect -a {input.xlsites} -b {params.annot} -wa -wb -s > {output.overlap}
-        """
+# rule annotateGenome:
+#     input:
+#         xlsites="results/annotation_xlsites/{sample}.repbase_overlaps",
+#     output:
+#         overlap = "results/annotation_xlsites/{sample}.genome_overlaps"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
+#         annot = "../../results/segment/regions.gtf"
+#     shell:
+#         """
+#         bedtools intersect -a {input.xlsites} -b {params.annot} -wa -wb -s > {output.overlap}
+#         """
 
 
-rule cleanupAnnotation:
-    input:
-        genome="results/annotation_xlsites/{sample}.genome_overlaps",
-        all_counts="results/annotation_xlsites/{sample}.finalcounts",
-        small_rna_annot=config["small_rna_annot"],
-        rDNAannot=config["rdna_annot"]
-    output:
-        finalannotation="results/annotation_xlsites/{sample}.final_annotation"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        Rscript --vanilla scripts/mergeAnnotation.R {input.genome} {input.all_counts} {input.small_rna_annot} {input.rDNAannot} {output.finalannotation}
-        """
+# rule cleanupAnnotation:
+#     input:
+#         genome="results/annotation_xlsites/{sample}.genome_overlaps",
+#         all_counts="results/annotation_xlsites/{sample}.finalcounts",
+#         small_rna_annot=config["small_rna_annot"],
+#         rDNAannot=config["rdna_annot"]
+#     output:
+#         finalannotation="results/annotation_xlsites/{sample}.final_annotation"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         Rscript --vanilla scripts/mergeAnnotation.R {input.genome} {input.all_counts} {input.small_rna_annot} {input.rDNAannot} {output.finalannotation}
+#         """
 
