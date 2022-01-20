@@ -189,7 +189,7 @@ rule chrM_star_Map:
         logfolder="results/logs/{sample}_mito_mapped.out"
     params:
         star_index=config["mito_index"],
-        log="results/mito_mapped/{sample}_mito_mapped.out",
+        log="results/mito_mapped/{sample}.Log.final.out",
         outprefix="results/mito_mapped/{sample}.",
         cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
     threads:
