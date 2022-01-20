@@ -356,10 +356,29 @@ rule split_mito:
         samtools faidx mito.fa
         pigz mito.fa
         cut -f1 ../../../{params.genome_fa}.fai | grep -v chrM > keep_these_chr.txt
-        samtools faidx ../../../{params.genome_fa} keep_these_chr.txt > genome_minus_mito.fa
+        seqtk subseq ../../../{params.genome_fa} keep_these_chr.txt > genome_minus_mito.fa
         pigz genome_minus_mito.fa
         pigz ../../../{params.genome_fa}
         rm *txt
         """
 
-# genome minus chrM
+# index genome files
+rule genomeSTARindex:
+    input:
+        genome_fasta="genome_minus_mito.fa.gz",
+        gtf=config["genome_annotation"]
+    threads:
+        8
+    params:
+        outdir="results/genome_star_index/",
+        cluster= '-p cpu -J star_index  -t 2:00:00 -n 1 --mem 32GB -c 8'
+    output:
+        index="results/genome_star_index/exonInfo.tab"
+    shell:
+        """
+        STAR --runThreadN {threads} \
+        --runMode genomeGenerate --genomeDir {params.outdir} \
+        --genomeFastaFiles {input.genome_fasta} --sjdbGTFfile {input.gtf} \
+        --outFileNamePrefix {params.outdir} \
+        --sjdbOverhang 49
+        """
