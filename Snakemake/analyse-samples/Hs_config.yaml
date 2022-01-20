@@ -16,3 +16,4 @@ genome_minus_mito_index: ../prepare-annotation/
 
 # Optional parameters
 remove_duplicates_ncRNA: True
+fraction_trnaisotype_merge: "0.9"

@@ -198,7 +198,7 @@ for key,value in final_cdna_counts_dict.items():
     final_cdna_counts_dict[key] = Counter(value)
 
 # Write a file condensed to groups of anticodons
-finalfile = open(dir_and_samp + "_trnas.cdnacounts", "w")
+finalfile = open(dir_and_samp + "_trnas.bed", "w")
 for key,value in final_cdna_counts_dict.items():
     gene = key
     for k in value:
@@ -207,7 +207,7 @@ finalfile.close()
 
 # Write a file where only reads unambiguous for anticodon are used
 
-finalfile = open(dir_and_samp + "_trnas_unambig_AC.cdnacounts", "w")
+finalfile = open(dir_and_samp + "_trnas_unambig_AC.bed", "w")
 for key,value in final_cdna_counts_dict_notmerge.items():
     gene = key
     for k in value:
