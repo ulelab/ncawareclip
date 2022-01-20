@@ -185,7 +185,7 @@ rule chrM_star_Map:
         fastq="results/immaturesnRNA_mapped/{sample}.Unmapped.fq"
     output:
         sam="results/mito_mapped/{sample}.Aligned.sortedByCoord.out.bam",
-        unmapped_fastq="results/mito_mapped/{sample}.Unmapped.out.mate1.fastq"
+        unmapped_fastq="results/mito_mapped/{sample}.Unmapped.out.mate1.fastq",
         logfolder="results/logs/{sample}_mito_mapped.out"
     params:
         star_index=config["mito_index"],
