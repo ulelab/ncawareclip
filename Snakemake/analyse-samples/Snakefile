@@ -327,7 +327,7 @@ rule get_mature_tRNA_cDNA_counts:
 rule get_immature_tRNA_cDNA_counts:
     input:
         "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
-     output:
+    output:
         bed="results/xlsites/{sample}_immature_tRNA.bed",
         cdnacounts="results/xlsites/{sample}_immature_tRNA.bed",
         bedgraph="results/xlsites/{sample}_immature_tRNA.bedgraph"
