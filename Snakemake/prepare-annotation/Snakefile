@@ -1,3 +1,10 @@
+# ---------------------------------------------------------------------------
+# ncRNA-aware CLIP pipeline
+# Workflow to prepare annotation indexes
+# Author: Charlotte Capitanchik
+# Last edit: January 2022
+# ---------------------------------------------------------------------------
+
 import os
 
 configfile:"species-specific-configs/Base_config.yaml"

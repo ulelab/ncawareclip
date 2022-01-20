@@ -1,5 +1,3 @@
-# Define pipeline path
-datapath: lab/luscomben/home/users/capitac/ncawareclip
 # Define samples
 samples:
 # NSUN2_m5C:
@@ -13,3 +11,8 @@ mature_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/all_snRNA_index/all_s
 immature_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie
 canonical_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie
 mito_index: ../prepare-annotation/Human_hg38/mito_separated/Mito_star_index
+repeats_index: ../prepare-annotation/Human_hg38/repeats/repeats_index/repeats_bowtie
+genome_minus_mito_index: ../prepare-annotation/
+
+# Optional parameters
+remove_duplicates_ncRNA: True
