@@ -11,7 +11,8 @@ rule all:
         config["species"]+"/snRNA/all_immature_snRNA_index/all_immature_snRNA_bowtie.1.ebwt",
         config["species"]+"/tRNA/all_tRNA_index/all_tRNA_bowtie.1.ebwt",
         config["species"]+"/tRNA/all_immature_tRNA_index/all_immature_tRNA_bowtie.1.ebwt",
-        config["species"]+"/repeats/repeats_index/repeats_bowtie.1.ebwt"
+        config["species"]+"/repeats/repeats_index/repeats_bowtie.1.ebwt",
+        config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz"
 
 
 # rDNA
@@ -333,7 +334,33 @@ rule repeats_bowtie_index:
         (bowtie-build {input} {params.outdir}) > {params.log}/repeats_bowtie.log
         """
 
-# chrM
-
+# split genome into chromosomes and then chrM
+rule split_mito:
+    threads:
+        4
+    params:
+        species=config["species"],
+        mito_name=config["mito_chromosome"]
+        outdir=config["species"]+"/mito_separated/mito_separated_sequences",
+        cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
+        genome_fa=config["species"]+"/full_genome/full_seq.fa",
+        log=config["species"]+"/logs"
+    output:
+        fasta=config["species"]+"//mito_separated/mito_separated_sequences/mito.fa.gz",
+        other_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz"
+    shell:
+        """
+        cd {params.outdir}
+        wget {params.annot}
+        gunzip ../../../{params.genome_fa}.gz
+        samtools faidx ../../../{params.genome_fa} {params.mito_name} > mito.fa
+        samtools faidx mito.fa
+        pigz mito.fa
+        cut -f1 ../../../{params.genome_fa}.fai | grep -v chrM > keep_these_chr.txt
+        samtools faidx ../../../{params.genome_fa} keep_these_chr.txt > genome_minus_mito.fa
+        pigz genome_minus_mito.fa
+        pigz ../../../{params.genome_fa}
+        rm *txt
+        """
 
 # genome minus chrM
