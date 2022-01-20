@@ -12,7 +12,7 @@ configfile: 'Hs_config.yaml'
 rule all:
     input:
         expand("results/xlsites/{sample}_rRNA.bedgraph", sample=config["samples"]),
-        expand("results/xlsites/{sample}_trnas.bed", sample=config["samples"])
+        expand("results/xlsites/{sample}_mature_tRNA.bed", sample=config["samples"])
 
 # ---------------------------------------------------------------------------
 # First trim reads
