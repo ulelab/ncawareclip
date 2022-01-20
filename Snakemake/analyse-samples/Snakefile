@@ -299,6 +299,7 @@ rule get_rRNA_cDNA_counts:
 
 
 
+
 rule removeTRNApcrdupes:
     input:
         "results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
@@ -467,18 +468,18 @@ rule getMerged:
     shell:
         "cat {input.chrm_counts} {input.restgenome_counts} {input.tRNA_counts} {input.immature_tRNA_counts} {input.rRNA_counts} > {output.final_counts}"
 
-rule annotateRepeats:
-    input:
-        xlsites="results/annotation_xlsites/{sample}.finalcounts",
-        annot=config["repeatmasker"]
-    output:
-        overlap = "results/annotation_xlsites/{sample}.repbase_overlaps"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        bedtools intersect -a {input.xlsites} -b {input.annot} -wa -wb -loj -s > {output.overlap}
-        """
+# rule annotateRepeats:
+#     input:
+#         xlsites="results/annotation_xlsites/{sample}.finalcounts",
+#         annot=config["repeatmasker"]
+#     output:
+#         overlap = "results/annotation_xlsites/{sample}.repbase_overlaps"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         bedtools intersect -a {input.xlsites} -b {input.annot} -wa -wb -loj -s > {output.overlap}
+#         """
 
 rule annotateGenome:
     input:
