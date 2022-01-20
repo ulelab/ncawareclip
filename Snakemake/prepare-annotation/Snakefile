@@ -368,7 +368,7 @@ rule split_mito:
 rule genomeSTARindex:
     input:
         genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz",
-        gtf=config["species"]+"/full_genome/full_annot.gtf.gz"
+        gtf=config["species"]+"/full_genome/full_annot.gtf.gz",
         unzip_genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa",
         unzip_gtf=config["species"]+"/full_genome/full_annot.gtf"
     threads:
