@@ -340,7 +340,7 @@ rule split_mito:
         4
     params:
         species=config["species"],
-        mito_name=config["mito_chromosome"]
+        mito_name=config["mito_chromosome"],
         outdir=config["species"]+"/mito_separated/mito_separated_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
