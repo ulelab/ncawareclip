@@ -307,15 +307,14 @@ rule get_mature_tRNA_cDNA_counts:
         sample = "{sample}",
         samp_and_dir= "results/maturetRNA_statistics/{sample}",
         seed="42",
-        fraction_merge=config["fraction_trnaisotype_merge"]
+        fraction_merge=config["fraction_trnaisotype_merge"],
+        dedupbam="results/maturetRNA_mapped/{sample}_DuplicatesRemoved.bam"
     run:
         if {params.remove_duplicates_ncRNA}:
             shell("python scripts/removeDuplicatesFromBam.py {input} {params.dedupbam}")
             shell("samtools index {params.dedupbam}")
-            shell("export PATH=/camp/lab/luscomben/working/charlotte/software/miniconda2/envs/p27/bin:$PATH")
             shell("python scripts/gettRNAxlsites_v2.py {params.dedupbam} {params.samp_and_dir} {params.sample} {params.seed} {params.fraction_merge}")
         else:
-            shell("export PATH=/camp/lab/luscomben/working/charlotte/software/miniconda2/envs/p27/bin:$PATH")
             shell("python scripts/gettRNAxlsites_v2.py {input} {params.samp_and_dir} {params.sample} {params.seed} {params.fraction_merge}")
 
 
