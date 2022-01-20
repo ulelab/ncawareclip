@@ -126,7 +126,7 @@ rule maturesnRNA_bowtieMap:
         bam="results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam",
         bai="results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
     params:
-        bowtie_index="results/maturesnRNA_bowtie_index/maturesnRNA_bowtie",
+        bowtie_index=config["mature_snRNA_index"],
         cluster="-N 1 -c 8 -J bt_map_maturesnRNA --mem=32G -t 1:00:00"
     threads:
         8
@@ -147,7 +147,7 @@ rule immaturesnRNA_bowtieMap:
         bam="results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam",
         bai="results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
     params:
-        bowtie_index="results/immaturesnRNA_bowtie_index/immaturesnRNA_bowtie",
+        bowtie_index=config["immature_snRNA_index"],
         cluster="-N 1 -c 8 -J bt_map_immaturesnRNA --mem=32G -t 1:00:00"
     threads:
         8
@@ -160,16 +160,16 @@ rule immaturesnRNA_bowtieMap:
 
 rule canonicalsnRNA_bowtieMap:
     input:
-        fastq="results/maturesnRNA_mapped/{sample}.Unmapped.fq"
+        fastq="results/immaturetRNA_mapped/{sample}.Unmapped.fq"
     output:
-        sam=temp("results/immaturesnRNA_mapped/{sample}.Aligned.out.sam"),
-        log="results/logs/{sample}.bowtie.immaturesnRNA.log",
-        unmapped_reads="results/immaturesnRNA_mapped/{sample}.Unmapped.fq",
-        bam="results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam",
-        bai="results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
+        sam=temp("results/canonicalsnRNA_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.canonicalsnRNA.log",
+        unmapped_reads="results/canonicalsnRNA_mapped/{sample}.Unmapped.fq",
+        bam="results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
     params:
-        bowtie_index="results/immaturesnRNA_bowtie_index/immaturesnRNA_bowtie",
-        cluster="-N 1 -c 8 -J bt_map_immaturesnRNA --mem=32G -t 1:00:00"
+        bowtie_index=config["canonical_snRNA_index"],
+        cluster="-N 1 -c 8 -J bt_map_canonicalsnRNA --mem=32G -t 1:00:00"
     threads:
         8
     shell:
@@ -179,7 +179,7 @@ rule canonicalsnRNA_bowtieMap:
         samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
         """
 
-rule chrM_bowtieMap:
+rule chrM_star_Map:
     input:
         fastq="results/immaturesnRNA_mapped/{sample}.Unmapped.fq"
     output:
@@ -189,7 +189,7 @@ rule chrM_bowtieMap:
         bam="results/chrM_mapped/{sample}.Aligned.out.sorted.bam",
         bai="results/chrM_mapped/{sample}.Aligned.out.sorted.bam.bai"
     params:
-        bowtie_index="results/chrM_bowtie_index/chrM_bowtie",
+        star_index=config["mito_index"],
         cluster="-N 1 -c 8 -J bt_map_chrM --mem=32G -t 1:00:00"
     threads:
         8
@@ -198,6 +198,33 @@ rule chrM_bowtieMap:
         cat {input.fastq} | \
         bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
         samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
+
+rule chrM_star_Map:
+    input:
+        fastq="results/chrM_mapped/{sample}.Unmapped.fq",
+        msg="results/genome_star_index/exonInfo.tab"
+    output:
+        sam="results/genome_mapped/{sample}.Aligned.out.sam",
+        logfolder="results/logs/{sample}.genome_mapped.Log.final.out"
+    params:
+        star_index="results/genome_star_index/",
+        log="results/genome_mapped/{sample}.Log.final.out",
+        outprefix="results/genome_mapped/{sample}.",
+        cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
+    threads:
+        8
+    shell:
+        """
+        STAR --runThreadN {threads} \
+        --genomeDir {params.star_index} \
+        --readFilesIn {input.fastq} \
+        --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
+        --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
+        --alignSJoverhangMin 100000000 --alignSJDBoverhangMin 1 --outFilterType BySJout \
+        --alignIntronMin 20 --alignIntronMax 1000000 --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
+         --outFilterMismatchNoverReadLmax 0.04
+        mv {params.log} {output.logfolder}
         """
 
 rule repeats_bowtieMap:
@@ -299,8 +326,8 @@ rule get_mature_tRNA_cDNA_counts:
     input:
         "results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
     output:
-        "results/xlsites/{sample}_trna_summary_stats.tsv",
-        "results/xlsites/{sample}_trnas.bed"
+        "results/xlsites/{sample}_mature_tRNA_summary_stats.tsv",
+        "results/xlsites/{sample}_mature_tRNA.bed"
     params:
         cluster="-N 1 -c 1 --mem=32G -t 1:00:00",
         remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"],
@@ -313,9 +340,9 @@ rule get_mature_tRNA_cDNA_counts:
         if {params.remove_duplicates_ncRNA}:
             shell("python scripts/removeDuplicatesFromBam.py {input} {params.dedupbam}")
             shell("samtools index {params.dedupbam}")
-            shell("python scripts/gettRNAxlsites_v2.py {params.dedupbam} {params.samp_and_dir} {params.sample} {params.seed} {params.fraction_merge}")
+            shell("python scripts/gettRNAxlsites_v2.py {params.dedupbam} {params.samp_and_dir}_mature {params.sample} {params.seed} {params.fraction_merge}")
         else:
-            shell("python scripts/gettRNAxlsites_v2.py {input} {params.samp_and_dir} {params.sample} {params.seed} {params.fraction_merge}")
+            shell("python scripts/gettRNAxlsites_v2.py {input} {params.samp_and_dir} {params.sample}_mature {params.seed} {params.fraction_merge}")
 
 
 rule removeTRNApcrdupes:

@@ -198,7 +198,7 @@ for key,value in final_cdna_counts_dict.items():
     final_cdna_counts_dict[key] = Counter(value)
 
 # Write a file condensed to groups of anticodons
-finalfile = open(dir_and_samp + "_trnas.bed", "w")
+finalfile = open(dir_and_samp + "_tRNA.bed", "w")
 for key,value in final_cdna_counts_dict.items():
     gene = key
     for k in value:
@@ -207,7 +207,7 @@ finalfile.close()
 
 # Write a file where only reads unambiguous for anticodon are used
 
-finalfile = open(dir_and_samp + "_trnas_unambig_AC.bed", "w")
+finalfile = open(dir_and_samp + "_tRNA_unambig_AC.bed", "w")
 for key,value in final_cdna_counts_dict_notmerge.items():
     gene = key
     for k in value:
@@ -244,14 +244,14 @@ for key, value in read_dictionary_anticodon.items():
 
 
 # Sort the dictionary by highest to lowest
-mixed_up_anticodons = open(dir_and_samp+"_trna_mixedup_anticodons.tsv", "w")
+mixed_up_anticodons = open(dir_and_samp+"_tRNA_mixedup_anticodons.tsv", "w")
 sorted_mixup_ranking = sorted(number_of_reads_multimapped_anticodon_dict.items(), key=operator.itemgetter(1), reverse=True)
 for i in sorted_mixup_ranking:
     if i[1] > 200:
         mixed_up_anticodons.write(str(i[0])+"\t"+str(i[1])+"\t"+str(total_mapped_reads)+"\t"+samp+"\n")
 mixed_up_anticodons.close()
 
-summary_stats = open(dir_and_samp+"_trna_summary_stats.tsv", "w")
+summary_stats = open(dir_and_samp+"_tRNA_summary_stats.tsv", "w")
 summary_stats.write("Total mapped reads to trna\t"+str(total_mapped_reads)+"\t"+samp+"\n")
 summary_stats.write("Total single mapping reads to trna\t"+str(total_uniquely_mapped)+"\t"+samp+"\n")
 summary_stats.write("Number of reads that are ambiguous at amino acid level\t"+str(number_of_reads_multimapped_aa)+"\t"+samp+"\n")
@@ -315,7 +315,7 @@ else:
     summary_stats.write("Biggest distance between ambiguous positions at anticodon level\t"+"NA"+"\t"+samp+"\n")
 summary_stats.close()
 
-ambig_stats = open(dir_and_samp+"_ambig_ac_position_dist.tsv", "w")
+ambig_stats = open(dir_and_samp+"_tRNA_ambig_ac_position_dist.tsv", "w")
 for key,value in ac_affected.items():
     ambig_stats.write(key+"\t"+str(value)+"\t"+str(ambig_pos)+"\n")
 ambig_stats.close()
