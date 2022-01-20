@@ -12,7 +12,8 @@ configfile: 'Hs_config.yaml'
 rule all:
     input:
         expand("results/xlsites/{sample}_rRNA.bedgraph", sample=config["samples"]),
-        expand("results/xlsites/{sample}_mature_tRNA.bed", sample=config["samples"])
+        expand("results/xlsites/{sample}_mature_tRNA.bed", sample=config["samples"]),
+        expand("results/xlsites/{sample}_immature_tRNA.bed", sample=config["samples"])
 
 # ---------------------------------------------------------------------------
 # First trim reads
@@ -322,6 +323,29 @@ rule get_mature_tRNA_cDNA_counts:
             shell("python scripts/gettRNAxlsites_v2.py {params.dedupbam} {params.samp_and_dir}_mature {params.sample} {params.seed} {params.fraction_merge}")
         else:
             shell("python scripts/gettRNAxlsites_v2.py {input} {params.samp_and_dir} {params.sample}_mature {params.seed} {params.fraction_merge}")
+
+rule get_immature_tRNA_cDNA_counts:
+    input:
+        "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        "results/xlsites/{sample}_immature_tRNA_summary_stats.tsv",
+        "results/xlsites/{sample}_immature_tRNA.bed"
+    params:
+        cluster="-N 1 -c 1 --mem=32G -t 1:00:00",
+        remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"],
+        sample = "{sample}",
+        samp_and_dir= "results/xlsites/{sample}",
+        seed="42",
+        fraction_merge=config["fraction_trnaisotype_merge"],
+        dedupbam="results/immaturetRNA_mapped/{sample}_DuplicatesRemoved.bam"
+    run:
+        if {params.remove_duplicates_ncRNA}:
+            shell("python scripts/removeDuplicatesFromBam.py {input} {params.dedupbam}")
+            shell("samtools index {params.dedupbam}")
+            shell("python scripts/gettRNAxlsites_v2.py {params.dedupbam} {params.samp_and_dir}_immature {params.sample} {params.seed} {params.fraction_merge}")
+        else:
+            shell("python scripts/gettRNAxlsites_v2.py {input} {params.samp_and_dir} {params.sample}_immature {params.seed} {params.fraction_merge}")
+
 
 
 
