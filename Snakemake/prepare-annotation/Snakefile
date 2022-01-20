@@ -380,8 +380,8 @@ rule genomeSTARindex:
         index=config["species"]+"/mito_separated/genomeMinusMito_star_index/exonInfo.tab"
     shell:
         """
-        gunzip {input.genome_fasta}.gz
-        gunzip {input.gtf}.gz
+        gunzip {input.genome_fasta}
+        gunzip {input.gtf}
         STAR --runThreadN {threads} \
         --runMode genomeGenerate --genomeDir {params.outdir} \
         --genomeFastaFiles {params.unzip_genome_fasta} --sjdbGTFfile {params.unzip_gtf} \
@@ -409,8 +409,8 @@ rule mitoSTARindex:
         index=config["species"]+"/mito_separated/Mito_star_index/exonInfo.tab"
     shell:
         """
-        gunzip {input.genome_fasta}.gz
-        gunzip {input.gtf}.gz
+        gunzip {input.genome_fasta}
+        gunzip {input.gtf}
         STAR --runThreadN {threads} \
         --runMode genomeGenerate --genomeDir {params.outdir} \
         --genomeFastaFiles {params.unzip_genome_fasta} --sjdbGTFfile {params.unzip_gtf} \
