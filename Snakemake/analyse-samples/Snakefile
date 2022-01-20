@@ -329,7 +329,7 @@ rule get_immature_tRNA_cDNA_counts:
         "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
     output:
         bed="results/xlsites/{sample}_immature_tRNA.bed",
-        cdnacounts="results/xlsites/{sample}_immature_tRNA.bed",
+        cdnacounts="results/xlsites/{sample}_immature_tRNA_cdnacounts.bed",
         bedgraph="results/xlsites/{sample}_immature_tRNA.bedgraph"
     params:
         cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
