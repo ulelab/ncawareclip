@@ -368,23 +368,23 @@ rule split_mito:
 rule genomeSTARindex:
     input:
         genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa.gz",
-        gtf=config["species"]+"/full_genome/full_annot.gtf.gz",
-        unzip_genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa",
-        unzip_gtf=config["species"]+"/full_genome/full_annot.gtf"
+        gtf=config["species"]+"/full_genome/full_annot.gtf.gz"
     threads:
         8
     params:
         outdir=config["species"]+"/mito_separated/genomeMinusMito_star_index",
-        cluster= '-p cpu -J star_index  -t 2:00:00 -n 1 --mem 64GB -c 8'
+        cluster= '-p cpu -J star_index  -t 2:00:00 -n 1 --mem 64GB -c 8',
+        unzip_genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/genome_minus_mito.fa",
+        unzip_gtf=config["species"]+"/full_genome/full_annot.gtf"
     output:
         index=config["species"]+"/mito_separated/genomeMinusMito_star_index/exonInfo.tab"
     shell:
         """
-        gunzip {params.genome_fasta}.gz
-        gunzip {params.gtf}.gz
+        gunzip {input.genome_fasta}.gz
+        gunzip {input.gtf}.gz
         STAR --runThreadN {threads} \
         --runMode genomeGenerate --genomeDir {params.outdir} \
-        --genomeFastaFiles {input.unzip_genome_fasta} --sjdbGTFfile {input.unzip_gtf} \
+        --genomeFastaFiles {params.unzip_genome_fasta} --sjdbGTFfile {params.unzip_gtf} \
         --outFileNamePrefix {params.outdir} \
         --sjdbOverhang 49
         pigz {params.unzip_genome_fasta}
@@ -396,23 +396,24 @@ rule genomeSTARindex:
 rule mitoSTARindex:
     input:
         genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa.gz",
-        unzip_genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa",
-        gtf=config["species"]+"/full_genome/full_annot.gtf.gz",
-        unzip_gtf=config["species"]+"/full_genome/full_annot.gtf"
+        gtf=config["species"]+"/full_genome/full_annot.gtf.gz"
     threads:
         8
     params:
         outdir=config["species"]+"/mito_separated/Mito_star_index",
-        cluster= '-p cpu -J star_index  -t 2:00:00 -n 1 --mem 64GB -c 8'
+        cluster= '-p cpu -J star_index  -t 2:00:00 -n 1 --mem 64GB -c 8',
+        unzip_genome_fasta=config["species"]+"/mito_separated/mito_separated_sequences/mito.fa",
+        unzip_gtf=config["species"]+"/full_genome/full_annot.gtf"
+
     output:
         index=config["species"]+"/mito_separated/Mito_star_index/exonInfo.tab"
     shell:
         """
-        gunzip {params.genome_fasta}.gz
-        gunzip {params.gtf}.gz
+        gunzip {input.genome_fasta}.gz
+        gunzip {input.gtf}.gz
         STAR --runThreadN {threads} \
         --runMode genomeGenerate --genomeDir {params.outdir} \
-        --genomeFastaFiles {input.unzip_genome_fasta} --sjdbGTFfile {input.unzip_gtf} \
+        --genomeFastaFiles {params.unzip_genome_fasta} --sjdbGTFfile {params.unzip_gtf} \
         --outFileNamePrefix {params.outdir} \
         --sjdbOverhang 49
         pigz {params.unzip_genome_fasta}
