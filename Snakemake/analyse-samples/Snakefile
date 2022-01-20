@@ -345,173 +345,143 @@ rule get_mature_tRNA_cDNA_counts:
             shell("python scripts/gettRNAxlsites_v2.py {input} {params.samp_and_dir} {params.sample}_mature {params.seed} {params.fraction_merge}")
 
 
-rule removeTRNApcrdupes:
-    input:
-        "results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
-    output:
-        bam="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.deduplicated.bam",
-        indexed="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.deduplicated.bam.bai"
-    params:
-        cluster="-N 1 -c 8 -J bt_map_maturetRNA --mem=64G -t 6:00:00"
-    shell:
-        """
-        python scripts/removeDuplicatesFromBam.py {input} {output.bam}
-        samtools index {output.bam}
-        """
-
-rule gettRNAstats:
-    input:
-        reads="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
-    output:
-        "results/maturetRNA_statistics/{sample}_trna_summary_stats.tsv",
-        "results/maturetRNA_statistics/{sample}_trnas.cdnacounts"
-    params:
-        cluster= '-N 1 -c 8 --mem=100G -t 1:00:00',
-        sample = "{sample}",
-        samp_and_dir= "results/maturetRNA_statistics/{sample}",
-        seed="42",
-        fraction_merge="0.9"
-    shell:
-        """
-        export PATH=/camp/lab/luscomben/working/charlotte/software/miniconda2/envs/p27/bin:$PATH
-        python scripts/gettRNAxlsites_v2.py {input.reads} {params.samp_and_dir} {params.sample} {params.seed} {params.fraction_merge}
-        """
-
-
-
-
-
-rule immaturetRNA_getCDNAcounts:
-    input:
-        "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
-    output:
-        bed="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
-        cdnacounts="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-        bedgraph="results/immaturetRNA_xlsites/{sample}.small.bedgraph"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        bedtools bamtobed -i {input} > {output.bed}
-        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
-        cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
-        sed -i '1 i\ track type=bedGraph' {output.bedgraph}
-        """
-
-
-
-
-rule maturesnRNA_getCDNAcounts:
-    input:
-        "results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
-    output:
-        "results/maturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        bedtools bamtobed -i {input} > {output}
-        """
-
-
-
-rule immaturesnRNA_getCDNAcounts:
-    input:
-        "results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
-    output:
-        bed="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
-        cdnacounts="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-        bedgraph="results/immaturesnRNA_xlsites/{sample}.small.bedgraph"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        bedtools bamtobed -i {input} > {output.bed}
-        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
-        cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
-        sed -i '1 i\ track type=bedGraph' {output.bedgraph}
-        """
-
-
-
-
-
-rule chrM_getCDNAcounts:
-    input:
-        "results/chrM_mapped/{sample}.Aligned.out.sorted.bam"
-    output:
-        bed="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.bed",
-        cdnacounts="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-        bedgraph="results/chrM_xlsites/{sample}.small.bedgraph"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        bedtools bamtobed -i {input} > {output.bed}
-        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
-        cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
-        sed -i '1 i\ track type=bedGraph' {output.bedgraph}
-        """
 
 
 
 
 
 
-rule getgenomeCDNAcounts:
-    input:
-        uniq="results/genome_mapped/{sample}.Aligned.out.sorted.bam",
-        multi="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam"
-    output:
-        uniq_bed="results/genome_xlsites/{sample}.Aligned.out.sorted.bed",
-        cdnacounts="results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts",
-        multi_bed="results/genome_xlsites/{sample}.multi.bed",
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        bedtools bamtobed -i {input.uniq} > {output.uniq_bed}
-        bedtools bamtobed -i {input.multi} > {output.multi_bed}
-        Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.uniq_bed} {output.cdnacounts}
-        """
+# rule immaturetRNA_getCDNAcounts:
+#     input:
+#         "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
+#     output:
+#         bed="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
+#         cdnacounts="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+#         bedgraph="results/immaturetRNA_xlsites/{sample}.small.bedgraph"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         bedtools bamtobed -i {input} > {output.bed}
+#         Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
+#         cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
+#         sed -i '1 i\ track type=bedGraph' {output.bedgraph}
+#         """
 
-rule getGenomeBedgraphs:
-    input:
-        "results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts"
-    output:
-        "results/genome_bedgraphs/{sample}.genome.bedgraph"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        awk '{{print $1 "\\t" $2 "\\t" $3 "\\t" $6 $5}}' {input} > {output}
-        """
 
-rule getUCSCBedgraphs:
-    input:
-        "results/genome_bedgraphs/{sample}.genome.bedgraph"
-    output:
-        "results/genome_ucsc_bedgraphs/{sample}.genome.bedgraph"
-    params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-    shell:
-        """
-        python3 scripts/chroms_to_ucsc.py --infile {input} --outfile {output} --species 'Homo sapiens'
-        """
 
-rule getMerged:
-    input:
-        chrm_counts="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-        tRNA_counts="results/maturetRNA_statistics/{sample}_trnas.cdnacounts",
-        immature_tRNA_counts="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-        rRNA_counts="results/rRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-        restgenome_counts="results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts"
-    output:
-        final_counts="results/annotation_xlsites/{sample}.finalcounts"
-    params:
-        cluster= '-N 1 -c 1 --mem=30G -t 1:00:00'
-    shell:
-        "cat {input.chrm_counts} {input.restgenome_counts} {input.tRNA_counts} {input.immature_tRNA_counts} {input.rRNA_counts} > {output.final_counts}"
+
+# rule maturesnRNA_getCDNAcounts:
+#     input:
+#         "results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
+#     output:
+#         "results/maturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         bedtools bamtobed -i {input} > {output}
+#         """
+
+
+
+# rule immaturesnRNA_getCDNAcounts:
+#     input:
+#         "results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
+#     output:
+#         bed="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
+#         cdnacounts="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+#         bedgraph="results/immaturesnRNA_xlsites/{sample}.small.bedgraph"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         bedtools bamtobed -i {input} > {output.bed}
+#         Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
+#         cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
+#         sed -i '1 i\ track type=bedGraph' {output.bedgraph}
+#         """
+
+
+
+
+
+# rule chrM_getCDNAcounts:
+#     input:
+#         "results/chrM_mapped/{sample}.Aligned.out.sorted.bam"
+#     output:
+#         bed="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.bed",
+#         cdnacounts="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+#         bedgraph="results/chrM_xlsites/{sample}.small.bedgraph"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         bedtools bamtobed -i {input} > {output.bed}
+#         Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
+#         cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
+#         sed -i '1 i\ track type=bedGraph' {output.bedgraph}
+#         """
+
+
+
+
+
+
+# rule getgenomeCDNAcounts:
+#     input:
+#         uniq="results/genome_mapped/{sample}.Aligned.out.sorted.bam",
+#         multi="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam"
+#     output:
+#         uniq_bed="results/genome_xlsites/{sample}.Aligned.out.sorted.bed",
+#         cdnacounts="results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts",
+#         multi_bed="results/genome_xlsites/{sample}.multi.bed",
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         bedtools bamtobed -i {input.uniq} > {output.uniq_bed}
+#         bedtools bamtobed -i {input.multi} > {output.multi_bed}
+#         Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.uniq_bed} {output.cdnacounts}
+#         """
+
+# rule getGenomeBedgraphs:
+#     input:
+#         "results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts"
+#     output:
+#         "results/genome_bedgraphs/{sample}.genome.bedgraph"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         awk '{{print $1 "\\t" $2 "\\t" $3 "\\t" $6 $5}}' {input} > {output}
+#         """
+
+# rule getUCSCBedgraphs:
+#     input:
+#         "results/genome_bedgraphs/{sample}.genome.bedgraph"
+#     output:
+#         "results/genome_ucsc_bedgraphs/{sample}.genome.bedgraph"
+#     params:
+#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+#     shell:
+#         """
+#         python3 scripts/chroms_to_ucsc.py --infile {input} --outfile {output} --species 'Homo sapiens'
+#         """
+
+# rule getMerged:
+#     input:
+#         chrm_counts="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+#         tRNA_counts="results/maturetRNA_statistics/{sample}_trnas.cdnacounts",
+#         immature_tRNA_counts="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+#         rRNA_counts="results/rRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
+#         restgenome_counts="results/genome_xlsites/{sample}.Aligned.out.sorted.cdnacounts"
+#     output:
+#         final_counts="results/annotation_xlsites/{sample}.finalcounts"
+#     params:
+#         cluster= '-N 1 -c 1 --mem=30G -t 1:00:00'
+#     shell:
+#         "cat {input.chrm_counts} {input.restgenome_counts} {input.tRNA_counts} {input.immature_tRNA_counts} {input.rRNA_counts} > {output.final_counts}"
 
 # rule annotateRepeats:
 #     input:
