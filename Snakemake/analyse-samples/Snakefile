@@ -84,7 +84,7 @@ rule maturetRNA_bowtieMap:
         bam="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam",
         bai="results/maturetRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
     params:
-        bowtie_index="results/maturetRNA_bowtie_index/maturetRNA_bowtie",
+        bowtie_index=config["mature_tRNA_index"],
         cluster="-N 1 -c 8 -J bt_map_maturetRNA --mem=32G -t 1:00:00"
     threads:
         8
@@ -105,7 +105,7 @@ rule immaturetRNA_bowtieMap:
         bam="results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam",
         bai="results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
     params:
-        bowtie_index="results/immaturetRNA_bowtie_index/immaturetRNA_bowtie",
+        bowtie_index=config["immature_tRNA_index"],
         cluster="-N 1 -c 8 -J bt_map_immaturetRNA --mem=32G -t 1:00:00"
     threads:
         8
