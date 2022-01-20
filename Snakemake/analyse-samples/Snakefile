@@ -305,7 +305,7 @@ rule get_mature_tRNA_cDNA_counts:
         cluster="-N 1 -c 1 --mem=32G -t 1:00:00",
         remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"],
         sample = "{sample}",
-        samp_and_dir= "results/maturetRNA_statistics/{sample}",
+        samp_and_dir= "results/xlsites/{sample}",
         seed="42",
         fraction_merge=config["fraction_trnaisotype_merge"],
         dedupbam="results/maturetRNA_mapped/{sample}_DuplicatesRemoved.bam"
