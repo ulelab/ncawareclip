@@ -13,8 +13,9 @@ rule all:
     input:
         expand("results/xlsites/{sample}_rRNA.bedgraph", sample=config["samples"]),
         expand("results/xlsites/{sample}_mature_tRNA.bed", sample=config["samples"]),
-        expand("results/xlsites/{sample}_immature_tRNA.bed", sample=config["samples"])
-
+        expand("results/xlsites/{sample}_immature_tRNA.bed", sample=config["samples"]),
+        expand("results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam", sample=config["samples"]),
+        expand("results/mito_mapped/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"])
 # ---------------------------------------------------------------------------
 # First trim reads
 # ---------------------------------------------------------------------------
@@ -165,7 +166,6 @@ rule canonicalsnRNA_bowtieMap:
     output:
         sam=temp("results/canonicalsnRNA_mapped/{sample}.Aligned.out.sam"),
         log="results/logs/{sample}.bowtie.canonicalsnRNA.log",
-        unmapped_reads="results/canonicalsnRNA_mapped/{sample}.Unmapped.fq",
         bam="results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam",
         bai="results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam.bai"
     params:
@@ -176,69 +176,21 @@ rule canonicalsnRNA_bowtieMap:
     shell:
         """
         cat {input.fastq} | \
-        bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc {params.bowtie_index} - {output.sam} 2> {output.log}
         samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
         """
 
 rule chrM_star_Map:
     input:
-        fastq="results/immaturesnRNA_mapped/{sample}.Unmapped.fq",
-        msg="results/genome_star_index/exonInfo.tab"
-    output:
-        sam="results/genome_mapped/{sample}.Aligned.out.sam",
-        logfolder="results/logs/{sample}.genome_mapped.Log.final.out"
-    params:
-        star_index="results/genome_star_index/",
-        log="results/genome_mapped/{sample}.Log.final.out",
-        outprefix="results/genome_mapped/{sample}.",
-        cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
-    threads:
-        8
-    shell:
-        """
-        STAR --runThreadN {threads} \
-        --genomeDir {params.star_index} \
-        --readFilesIn {input.fastq} \
-        --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
-        --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
-        --alignSJoverhangMin 100000000 --alignSJDBoverhangMin 1 --outFilterType BySJout \
-        --alignIntronMin 20 --alignIntronMax 1000000 --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
-         --outFilterMismatchNoverReadLmax 0.04
-        mv {params.log} {output.logfolder}
-        """
-
-rule repeats_bowtieMap:
-    input:
         fastq="results/immaturesnRNA_mapped/{sample}.Unmapped.fq"
     output:
-        sam=temp("results/chrM_mapped/{sample}.Aligned.out.sam"),
-        log="results/logs/{sample}.bowtie.chrM.log",
-        unmapped_reads="results/chrM_mapped/{sample}.Unmapped.fq",
-        bam="results/chrM_mapped/{sample}.Aligned.out.sorted.bam",
-        bai="results/chrM_mapped/{sample}.Aligned.out.sorted.bam.bai"
+        sam="results/mito_mapped/{sample}.Aligned.sortedByCoord.out.bam",
+        unmapped_fastq="results/mito_mapped/{sample}.Unmapped.out.mate1.fastq"
+        logfolder="results/logs/{sample}_mito_mapped.out"
     params:
-        bowtie_index="results/chrM_bowtie_index/chrM_bowtie",
-        cluster="-N 1 -c 8 -J bt_map_chrM --mem=32G -t 1:00:00"
-    threads:
-        8
-    shell:
-        """
-        cat {input.fastq} | \
-        bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
-        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
-        """
-
-rule genomeMapreads:
-    input:
-        fastq="results/chrM_mapped/{sample}.Unmapped.fq",
-        msg="results/genome_star_index/exonInfo.tab"
-    output:
-        sam="results/genome_mapped/{sample}.Aligned.out.sam",
-        logfolder="results/logs/{sample}.genome_mapped.Log.final.out"
-    params:
-        star_index="results/genome_star_index/",
-        log="results/genome_mapped/{sample}.Log.final.out",
-        outprefix="results/genome_mapped/{sample}.",
+        star_index=config["mito_index"],
+        log="results/mito_mapped/{sample}_mito_mapped.out",
+        outprefix="results/mito_mapped/{sample}.",
         cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
     threads:
         8
@@ -248,32 +200,80 @@ rule genomeMapreads:
         --genomeDir {params.star_index} \
         --readFilesIn {input.fastq} \
         --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
-        --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
-        --alignSJoverhangMin 100000000 --alignSJDBoverhangMin 1 --outFilterType BySJout \
+        --outFilterMultimapNmax 1 --outFilterMultimapScoreRange 1 \
+        --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
         --alignIntronMin 20 --alignIntronMax 1000000 --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
-         --outFilterMismatchNoverReadLmax 0.04
+         --outFilterMismatchNoverReadLmax 0.04 --outSAMtype BAM SortedByCoordinate --outReadsUnmapped Fastq
         mv {params.log} {output.logfolder}
         """
 
-rule makegenomeBam:
-    input:
-        samfile="results/genome_mapped/{sample}.Aligned.out.sam"
-    output:
-        Uniquebamfile="results/genome_mapped/{sample}.Aligned.out.sorted.bam",
-        Multibamfile="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam",
-        Uniqueindex="results/genome_mapped/{sample}.Aligned.out.sorted.bam.bai",
-        Multiindex="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam.bai"
-    params:
-        cluster="-N 1 -c 8 --mem=8G -t 1:00:00"
-    threads:
-        8
-    shell:
-        """
-        sambamba view -t {threads} -S -f bam -F "mapping_quality==255" {input.samfile} | sambamba sort /dev/stdin -o {output.Uniquebamfile}
-        sambamba view -t {threads} -S -f bam -F "mapping_quality!=255" {input.samfile} | sambamba sort /dev/stdin -o {output.Multibamfile}
-        sambamba index -t {threads} {output.Uniquebamfile} {output.Uniqueindex}
-        sambamba index -t {threads} {output.Multibamfile} {output.Multiindex}
-        """
+# rule repeats_bowtieMap:
+#     input:
+#         fastq="results/immaturesnRNA_mapped/{sample}.Unmapped.fq"
+#     output:
+#         sam=temp("results/chrM_mapped/{sample}.Aligned.out.sam"),
+#         log="results/logs/{sample}.bowtie.chrM.log",
+#         unmapped_reads="results/chrM_mapped/{sample}.Unmapped.fq",
+#         bam="results/chrM_mapped/{sample}.Aligned.out.sorted.bam",
+#         bai="results/chrM_mapped/{sample}.Aligned.out.sorted.bam.bai"
+#     params:
+#         bowtie_index="results/chrM_bowtie_index/chrM_bowtie",
+#         cluster="-N 1 -c 8 -J bt_map_chrM --mem=32G -t 1:00:00"
+#     threads:
+#         8
+#     shell:
+#         """
+#         cat {input.fastq} | \
+#         bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+#         samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+#         """
+
+# rule genomeMapreads:
+#     input:
+#         fastq="results/chrM_mapped/{sample}.Unmapped.fq",
+#         msg="results/genome_star_index/exonInfo.tab"
+#     output:
+#         sam="results/genome_mapped/{sample}.Aligned.out.sam",
+#         logfolder="results/logs/{sample}.genome_mapped.Log.final.out"
+#     params:
+#         star_index="results/genome_star_index/",
+#         log="results/genome_mapped/{sample}.Log.final.out",
+#         outprefix="results/genome_mapped/{sample}.",
+#         cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
+#     threads:
+#         8
+#     shell:
+#         """
+#         STAR --runThreadN {threads} \
+#         --genomeDir {params.star_index} \
+#         --readFilesIn {input.fastq} \
+#         --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
+#         --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
+#         --alignSJoverhangMin 100000000 --alignSJDBoverhangMin 1 --outFilterType BySJout \
+#         --alignIntronMin 20 --alignIntronMax 1000000 --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
+#          --outFilterMismatchNoverReadLmax 0.04
+#         mv {params.log} {output.logfolder}
+#         """
+
+# rule makegenomeBam:
+#     input:
+#         samfile="results/genome_mapped/{sample}.Aligned.out.sam"
+#     output:
+#         Uniquebamfile="results/genome_mapped/{sample}.Aligned.out.sorted.bam",
+#         Multibamfile="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam",
+#         Uniqueindex="results/genome_mapped/{sample}.Aligned.out.sorted.bam.bai",
+#         Multiindex="results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam.bai"
+#     params:
+#         cluster="-N 1 -c 8 --mem=8G -t 1:00:00"
+#     threads:
+#         8
+#     shell:
+#         """
+#         sambamba view -t {threads} -S -f bam -F "mapping_quality==255" {input.samfile} | sambamba sort /dev/stdin -o {output.Uniquebamfile}
+#         sambamba view -t {threads} -S -f bam -F "mapping_quality!=255" {input.samfile} | sambamba sort /dev/stdin -o {output.Multibamfile}
+#         sambamba index -t {threads} {output.Uniquebamfile} {output.Uniqueindex}
+#         sambamba index -t {threads} {output.Multibamfile} {output.Multiindex}
+#         """
 
 
 # ---------------------------------------------------------------------------
@@ -327,24 +327,24 @@ rule get_mature_tRNA_cDNA_counts:
 rule get_immature_tRNA_cDNA_counts:
     input:
         "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
-    output:
-        "results/xlsites/{sample}_immature_tRNA_summary_stats.tsv",
-        "results/xlsites/{sample}_immature_tRNA.bed"
+     output:
+        bed="results/xlsites/{sample}_immature_tRNA.bed",
+        cdnacounts="results/xlsites/{sample}_immature_tRNA.bed",
+        bedgraph="results/xlsites/{sample}_immature_tRNA.bedgraph"
     params:
-        cluster="-N 1 -c 1 --mem=32G -t 1:00:00",
-        remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"],
-        sample = "{sample}",
-        samp_and_dir= "results/xlsites/{sample}",
-        seed="42",
-        fraction_merge=config["fraction_trnaisotype_merge"],
-        dedupbam="results/immaturetRNA_mapped/{sample}_DuplicatesRemoved.bam"
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
+        remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"]
     run:
         if {params.remove_duplicates_ncRNA}:
-            shell("python scripts/removeDuplicatesFromBam.py {input} {params.dedupbam}")
-            shell("samtools index {params.dedupbam}")
-            shell("python scripts/gettRNAxlsites_v2.py {params.dedupbam} {params.samp_and_dir}_immature {params.sample} {params.seed} {params.fraction_merge}")
+            shell("bedtools bamtobed -i {input} > {output.bed}")
+            shell("Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}")
+            shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
+            shell("sed -i '1 i\ track type=bedGraph' {output.bedgraph}")
         else:
-            shell("python scripts/gettRNAxlsites_v2.py {input} {params.samp_and_dir} {params.sample}_immature {params.seed} {params.fraction_merge}")
+            shell("bedtools bamtobed -i {input} > {output.bed}")
+            shell("Rscript --vanilla scripts/getcDNAcounts.R {output.bed} {output.cdnacounts}")
+            shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
+            shell("sed -i '1 i\ track type=bedGraph' {output.bedgraph}")
 
 
 
