@@ -283,7 +283,7 @@ rule get_rRNA_cDNA_counts:
         cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
         remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"]
     run:
-        if remove_duplicates_ncRNA=="True":
+        if {params.remove_duplicates_ncRNA}:
             shell("bedtools bamtobed -i {input} > {output.bed}")
             shell("Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}")
             shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
