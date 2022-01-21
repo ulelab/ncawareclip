@@ -231,7 +231,7 @@ rule repeats_bowtieMap:
 
 rule genomeMapreads:
     input:
-        fastq="results/repeats_mapped/{sample}..Unmapped.fq"
+        fastq="results/repeats_mapped/{sample}.Unmapped.fq"
     output:
         sam="results/genome_mapped/{sample}.Aligned.out.sam",
         logfolder="results/logs/{sample}.genome_mapped.Log.final.out"
