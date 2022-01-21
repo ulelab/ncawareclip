@@ -15,7 +15,7 @@ rule all:
         expand("results/xlsites/{sample}_mature_tRNA.bed", sample=config["samples"]),
         expand("results/xlsites/{sample}_immature_tRNA.bed", sample=config["samples"]),
         expand("results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam", sample=config["samples"]),
-        expand("results/mito_mapped/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"])
+        expand("results/repeats_mapped/{sample}.Aligned.out.sorted.bam", sample=config["samples"])
 # ---------------------------------------------------------------------------
 # First trim reads
 # ---------------------------------------------------------------------------
@@ -207,26 +207,26 @@ rule chrM_star_Map:
         mv {params.log} {output.logfolder}
         """
 
-# rule repeats_bowtieMap:
-#     input:
-#         fastq="results/immaturesnRNA_mapped/{sample}.Unmapped.fq"
-#     output:
-#         sam=temp("results/chrM_mapped/{sample}.Aligned.out.sam"),
-#         log="results/logs/{sample}.bowtie.chrM.log",
-#         unmapped_reads="results/chrM_mapped/{sample}.Unmapped.fq",
-#         bam="results/chrM_mapped/{sample}.Aligned.out.sorted.bam",
-#         bai="results/chrM_mapped/{sample}.Aligned.out.sorted.bam.bai"
-#     params:
-#         bowtie_index="results/chrM_bowtie_index/chrM_bowtie",
-#         cluster="-N 1 -c 8 -J bt_map_chrM --mem=32G -t 1:00:00"
-#     threads:
-#         8
-#     shell:
-#         """
-#         cat {input.fastq} | \
-#         bowtie -a -v 2 -m 1 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
-#         samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
-#         """
+rule repeats_bowtieMap:
+    input:
+        fastq="results/mito_mapped/{sample}.Unmapped.out.mate1"
+    output:
+        sam=temp("results/repeats_mapped/{sample}.Aligned.out.sam"),
+        log="results/logs/{sample}.bowtie.repeats.log",
+        unmapped_reads="results/repeats_mapped/{sample}.Unmapped.fq",
+        bam="results/repeats_mapped/{sample}.Aligned.out.sorted.bam",
+        bai="results/repeats_mapped/{sample}.Aligned.out.sorted.bam.bai"
+    params:
+        bowtie_index=config["repeats_index"],
+        cluster="-N 1 -c 8 -J bt_map_repeats --mem=32G -t 1:00:00"
+    threads:
+        8
+    shell:
+        """
+        cat {input.fastq} | \
+        bowtie -a -v 2 -m 100 --best --strata --threads 8 -q --sam --norc --un {output.unmapped_reads} {params.bowtie_index} - {output.sam} 2> {output.log}
+        samtools view -hu -F 4 {output.sam} | sambamba sort -t 8 -o {output.bam} /dev/stdin
+        """
 
 # rule genomeMapreads:
 #     input:
