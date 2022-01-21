@@ -12,7 +12,7 @@ immature_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/all_immature_snRNA_
 canonical_snRNA_index: ../prepare-annotation/Human_hg38/snRNA/canonical_snRNA_index/canonical_snRNA_bowtie
 mito_index: ../prepare-annotation/Human_hg38/mito_separated/Mito_star_index
 repeats_index: ../prepare-annotation/Human_hg38/repeats/repeats_index/repeats_bowtie
-genome_minus_mito_index: ../prepare-annotation/
+genome_minus_mito_index: ../prepare-annotation/Human_hg38/mito_separated/genomeMinusMito_star_index
 
 # Optional parameters
 remove_duplicates_ncRNA: True
