@@ -15,8 +15,8 @@ rule all:
         expand("results/xlsites/{sample}_mature_tRNA.bed", sample=config["samples"]),
         expand("results/xlsites/{sample}_immature_tRNA.bed", sample=config["samples"]),
         expand("results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam", sample=config["samples"]),
-        expand("results/repeats_mapped/{sample}.Aligned.out.sorted.bam", sample=config["samples"]),
         expand("results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam", sample=config["samples"])
+
 # ---------------------------------------------------------------------------
 # First trim reads
 # ---------------------------------------------------------------------------
