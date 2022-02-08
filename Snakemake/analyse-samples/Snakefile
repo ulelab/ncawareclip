@@ -435,7 +435,7 @@ rule get_genome_cDNA_counts:
         Uniquebamfile="results/genome_mapped/{sample}.Aligned.out.sorted.bam"
     output:
         bed="results/xlsites/{sample}_genome.bed",
-        cdnacounts="results/xlsites/{sample}_genome.bed",
+        cdnacounts="results/xlsites/{sample}_genome_cdnacounts.bed",
         bedgraph="results/xlsites/{sample}_genome.bedgraph"
     params:
         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
