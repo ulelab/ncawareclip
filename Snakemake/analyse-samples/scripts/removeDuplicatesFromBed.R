@@ -17,7 +17,7 @@ output_file <- args[2]
 
 
 input_bed <- fread(input_file) 
-
+print(head(input_bed))
 out_fwd = input_bed %>%
                 filter(V6=="+") %>%
                 mutate(rbc=gsub(".*rbc:","",V4))
