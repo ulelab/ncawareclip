@@ -17,16 +17,16 @@ output_file <- args[2]
 
 
 input_bed <- fread(input_file) 
-print(head(input_bed))
+
 out_fwd = input_bed %>%
                 filter(V6=="+") %>%
-                mutate(rbc=gsub(".*rbc:","",V4))
+                mutate(rbc=gsub(".*rbc:","",V4)) %>%
                 dplyr::group_by(V1, V2, rbc) %>%
                 dplyr::slice(n=1)
 
 out_rev = input_bed %>%
                 filter(V6=="-") %>%
-                mutate(rbc=gsub(".*rbc:","",V4))
+                mutate(rbc=gsub(".*rbc:","",V4)) %>%
                 dplyr::group_by(V1, V3, rbc) %>%
                 dplyr::slice(n=1)
 
