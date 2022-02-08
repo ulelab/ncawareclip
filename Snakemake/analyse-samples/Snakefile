@@ -14,6 +14,8 @@ rule all:
         expand("results/xlsites/{sample}_rRNA.bedgraph", sample=config["samples"]),
         expand("results/xlsites/{sample}_mature_tRNA.bed", sample=config["samples"]),
         expand("results/xlsites/{sample}_immature_tRNA.bed", sample=config["samples"]),
+        expand("results/xlsites/{sample}_mature_snRNA.bedgraph", sample=config["samples"]),
+        expand("results/xlsites/{sample}_immature_snRNA.bedgraph", sample=config["samples"]),
         expand("results/canonicalsnRNA_mapped/{sample}.Aligned.out.sorted.bam", sample=config["samples"]),
         expand("results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam", sample=config["samples"])
 
@@ -333,6 +335,21 @@ rule get_immature_tRNA_cDNA_counts:
         cdnacounts="results/xlsites/{sample}_immature_tRNA_cdnacounts.bed",
         bedgraph="results/xlsites/{sample}_immature_tRNA.bedgraph"
     params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    run:
+        shell("bedtools bamtobed -i {input} > {output.bed}")
+        shell("Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}")
+        shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
+        shell("sed -i '1 i\ track type=bedGraph' {output.bedgraph}")
+
+rule get_mature_snRNA_cDNA_counts:
+    input:
+        "results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        bed="results/xlsites/{sample}_mature_snRNA.bed",
+        cdnacounts="results/xlsites/{sample}_mature_snRNA_cdnacounts.bed",
+        bedgraph="results/xlsites/{sample}_mature_snRNA.bedgraph"
+    params:
         cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
         remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"]
     run:
@@ -347,10 +364,20 @@ rule get_immature_tRNA_cDNA_counts:
             shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
             shell("sed -i '1 i\ track type=bedGraph' {output.bedgraph}")
 
-
-
-
-
+rule get_immature_snRNA_cDNA_counts:
+    input:
+        "results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
+    output:
+        bed="results/xlsites/{sample}_immature_snRNA.bed",
+        cdnacounts="results/xlsites/{sample}_immature_snRNA_cdnacounts.bed",
+        bedgraph="results/xlsites/{sample}_immature_snRNA.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    run:
+        shell("bedtools bamtobed -i {input} > {output.bed}")
+        shell("Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}")
+        shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
+        shell("sed -i '1 i\ track type=bedGraph' {output.bedgraph}")
 
 
 
