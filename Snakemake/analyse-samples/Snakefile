@@ -17,6 +17,7 @@ rule all:
         expand("results/xlsites/{sample}_mature_snRNA.bedgraph", sample=config["samples"]),
         expand("results/xlsites/{sample}_immature_snRNA.bedgraph", sample=config["samples"]),
         expand("results/xlsites/{sample}_canonical_snRNA.bedgraph", sample=config["samples"]),
+        expand("results/xlsites/{sample}_mito.bedgraph", sample=config["samples"]),
         expand("results/genome_mapped/{sample}.Aligned.out.multi.sorted.bam", sample=config["samples"])
 
 # ---------------------------------------------------------------------------
@@ -401,78 +402,24 @@ rule get_canonical_snRNA_cDNA_counts:
             shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
             shell("sed -i '1 i\ track type=bedGraph' {output.bedgraph}")
 
-
-# rule immaturetRNA_getCDNAcounts:
-#     input:
-#         "results/immaturetRNA_mapped/{sample}.Aligned.out.sorted.bam"
-#     output:
-#         bed="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
-#         cdnacounts="results/immaturetRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-#         bedgraph="results/immaturetRNA_xlsites/{sample}.small.bedgraph"
-#     params:
-#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-#     shell:
-#         """
-#         bedtools bamtobed -i {input} > {output.bed}
-#         Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
-#         cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
-#         sed -i '1 i\ track type=bedGraph' {output.bedgraph}
-#         """
+rule get_mito_cDNA_counts:
+    input:
+        "results/mito_mapped/{sample}.Aligned.sortedByCoord.out.bam"
+    output:
+        bed="results/xlsites/{sample}_mito.bed",
+        cdnacounts="results/xlsites/{sample}_mito_cdnacounts.bed",
+        bedgraph="results/xlsites/{sample}_mito.bedgraph"
+    params:
+        cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
+    run:
+        shell("bedtools bamtobed -i {input} > {output.bed}")
+        shell("Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}")
+        shell("cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}")
+        shell("sed -i '1 i\ track type=bedGraph' {output.bedgraph}")
 
 
 
 
-# rule maturesnRNA_getCDNAcounts:
-#     input:
-#         "results/maturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
-#     output:
-#         "results/maturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed"
-#     params:
-#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-#     shell:
-#         """
-#         bedtools bamtobed -i {input} > {output}
-#         """
-
-
-
-# rule immaturesnRNA_getCDNAcounts:
-#     input:
-#         "results/immaturesnRNA_mapped/{sample}.Aligned.out.sorted.bam"
-#     output:
-#         bed="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.bed",
-#         cdnacounts="results/immaturesnRNA_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-#         bedgraph="results/immaturesnRNA_xlsites/{sample}.small.bedgraph"
-#     params:
-#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-#     shell:
-#         """
-#         bedtools bamtobed -i {input} > {output.bed}
-#         Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
-#         cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
-#         sed -i '1 i\ track type=bedGraph' {output.bedgraph}
-#         """
-
-
-
-
-
-# rule chrM_getCDNAcounts:
-#     input:
-#         "results/chrM_mapped/{sample}.Aligned.out.sorted.bam"
-#     output:
-#         bed="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.bed",
-#         cdnacounts="results/chrM_xlsites/{sample}.small.Aligned.out.sorted.cdnacounts",
-#         bedgraph="results/chrM_xlsites/{sample}.small.bedgraph"
-#     params:
-#         cluster="-N 1 -c 1 --mem=8G -t 1:00:00"
-#     shell:
-#         """
-#         bedtools bamtobed -i {input} > {output.bed}
-#         Rscript --vanilla scripts/getcDNAcounts_removeDups.R {output.bed} {output.cdnacounts}
-#         cut -f1,2,3,5 {output.cdnacounts} > {output.bedgraph}
-#         sed -i '1 i\ track type=bedGraph' {output.bedgraph}
-#         """
 
 
 
