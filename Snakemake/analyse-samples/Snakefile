@@ -19,7 +19,8 @@ rule all:
         expand("results/xlsites/{sample}_canonical_snRNA.bedgraph", sample=config["samples"]),
         expand("results/xlsites/{sample}_mito.bedgraph", sample=config["samples"]),
         expand("results/xlsites/{sample}_repeats_cdna.bed", sample=config["samples"]),
-        expand("results/xlsites/{sample}_genome.bedgraph", sample=config["samples"])
+        expand("results/xlsites/{sample}_genome.bedgraph", sample=config["samples"]),
+        expand("results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"])
 
 # ---------------------------------------------------------------------------
 # First trim reads
@@ -255,6 +256,32 @@ rule genomeMapreads:
         --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
         --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
         --alignIntronMin 20 --alignIntronMax 1000000 --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
+         --outFilterMismatchNoverReadLmax 0.04
+        mv {params.log} {output.logfolder}
+        """
+
+rule NOPREMAPgenomeMapreads:
+    input:
+        fastq="results/repeats_mapped/{sample}.Unmapped.fq"
+    output:
+        sam="results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam",
+        logfolder="results/logs/{sample}.NOPREMAP_genome_mapped.Log.final.out"
+    params:
+        star_index=config["genome_minus_mito_index"],
+        log="results/genome_mapped/{sample}.Log.final.out",
+        outprefix="results/genome_mapped/{sample}.",
+        cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
+    threads:
+        8
+    shell:
+        """
+        STAR --runThreadN {threads} \
+        --genomeDir {params.star_index} \
+        --readFilesIn {input.fastq} \
+        --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
+        --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
+        --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
+        --alignIntronMin 20 --alignIntronMax 1000000 --outSAMtype BAM SortedByCoordinate --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
          --outFilterMismatchNoverReadLmax 0.04
         mv {params.log} {output.logfolder}
         """
