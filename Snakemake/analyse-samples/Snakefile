@@ -262,7 +262,7 @@ rule genomeMapreads:
 
 rule NOPREMAPgenomeMapreads:
     input:
-        fastq="results/repeats_mapped/{sample}.Unmapped.fq"
+        fastq="results/trim_galore/{sample}_trimmed.fq.gz"
     output:
         sam="results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam",
         logfolder="results/logs/{sample}.NOPREMAP_genome_mapped.Log.final.out"
@@ -279,7 +279,7 @@ rule NOPREMAPgenomeMapreads:
         --genomeDir {params.star_index} \
         --readFilesIn {input.fastq} \
         --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
-        --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 \
+        --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 --readFilesCommand zcat \
         --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
         --alignIntronMin 20 --alignIntronMax 1000000 --outSAMtype BAM SortedByCoordinate --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
          --outFilterMismatchNoverReadLmax 0.04
