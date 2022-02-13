@@ -265,6 +265,8 @@ rule NOPREMAPgenomeMapreads:
         fastq="results/trim_galore/{sample}_trimmed.fq.gz"
     output:
         sam="results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam",
+        bai="results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam.bai",
+        bed="results/no_premap_genome_mapped/{sample}.no_premap.bed",
         logfolder="results/logs/{sample}.NOPREMAP_genome_mapped.Log.final.out"
     params:
         star_index=config["genome_minus_mito_index"],
@@ -283,6 +285,8 @@ rule NOPREMAPgenomeMapreads:
         --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
         --alignIntronMin 20 --alignIntronMax 1000000 --outSAMtype BAM SortedByCoordinate --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
          --outFilterMismatchNoverReadLmax 0.04
+        sambamba index -t {threads} {output.sam} {output.bai}
+        bedtools bamtobed -i {output.sam} > {output.bed}
         mv {params.log} {output.logfolder}
         """
 
