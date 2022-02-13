@@ -172,11 +172,11 @@ rule immature_snRNA_sequences:
     params:
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
         genome_fai=config["species"]+"/full_genome/full_seq.fa.fai",
-        bed=config["species"]+"/snRNA/all_snrna_flank50.bed",
         outdir=config["species"]+"/snRNA/snRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
-        fasta=config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa"
+        fasta=config["species"]+"/snRNA/snRNA_sequences/all_immature_snRNA.fa",
+        bed=config["species"]+"/snRNA/all_snrna_flank50.bed"
     shell:
         """
         zcat {input} | grep snRNA | awk '$3 == "gene"' | awk '{{print $1 "\\t" $4 "\\t" $5 "\\t" $10 "\\t.\\t" $7}}' \
