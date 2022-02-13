@@ -290,8 +290,8 @@ rule NOPREMAPgenomeMapreads:
          --outFilterMismatchNoverReadLmax 0.04
         sambamba index -t {threads} {output.sam} {output.bai}
         bedtools bamtobed -i {output.sam} > {output.bed}
-        bedtools intersect -a {output.bed} -b ../prepare-annotation/Human_hg38/tRNA/tRNA_sequences/all_trna_flank50.bed -s -wa -wb > {output.t_bed}
-        bedtools intersect -a {output.bed} -b ../prepare-annotation/Human_hg38/snRNA/all_snrna_flank50.bed -s -wa -wb > {output.s_bed}
+        bedtools intersect -a {output.bed} -b ../prepare-annotation/Human_hg38/tRNA/tRNA_sequences/all_trna_flank50.bed -s -wa -wb -loj > {output.t_bed}
+        bedtools intersect -a {output.bed} -b ../prepare-annotation/Human_hg38/snRNA/all_snrna_flank50.bed -s -wa -wb -loj > {output.s_bed}
         mv {params.log} {output.logfolder}
         """
 
