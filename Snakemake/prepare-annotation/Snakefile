@@ -20,7 +20,9 @@ rule all:
         config["species"]+"/tRNA/all_immature_tRNA_index/all_immature_tRNA_bowtie.1.ebwt",
         config["species"]+"/repeats/repeats_index/repeats_bowtie.1.ebwt",
         config["species"]+"/mito_separated/genomeMinusMito_star_index/exonInfo.tab",
-        config["species"]+"/mito_separated/Mito_star_index/exonInfo.tab"
+        config["species"]+"/mito_separated/Mito_star_index/exonInfo.tab",
+        config["species"]+"/tRNA/tRNA_sequences/all_trna_flank50.bed",
+        config["species"]+"/snRNA/all_snrna_flank50.bed"
 
 
 # rDNA
@@ -170,6 +172,7 @@ rule immature_snRNA_sequences:
     params:
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
         genome_fai=config["species"]+"/full_genome/full_seq.fa.fai",
+        bed=config["species"]+"/snRNA/all_snrna_flank50.bed",
         outdir=config["species"]+"/snRNA/snRNA_sequences",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00'
     output:
@@ -178,11 +181,11 @@ rule immature_snRNA_sequences:
         """
         zcat {input} | grep snRNA | awk '$3 == "gene"' | awk '{{print $1 "\\t" $4 "\\t" $5 "\\t" $10 "\\t.\\t" $7}}' \
         | sed s'/"//g' | sed s'/;//g' > temp_snrna.bed
-        bedtools slop -i temp_snrna.bed -b 50 -g {params.genome_fai} > temp_flank50_snrna.bed
+        bedtools slop -i temp_snrna.bed -b 50 -g {params.genome_fai} > {output.bed}
         gunzip {params.genome_fa}.gz
-        bedtools getfasta -s -bed temp_flank50_snrna.bed -fi {params.genome_fa} -nameOnly > {output.fasta}
+        bedtools getfasta -s -bed {output.bed} -fi {params.genome_fa} -nameOnly > {output.fasta}
         pigz {params.genome_fa}
-        rm temp_flank50_snrna.bed temp_snrna.bed
+        rm temp_snrna.bed
         """
 
 rule immature_snRNA_bowtie_index:
@@ -262,7 +265,8 @@ rule download_immature_trna:
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
         log=config["species"]+"/logs"
     output:
-        fasta=config["species"]+"/tRNA/tRNA_sequences/immature_seqs.fa"
+        fasta=config["species"]+"/tRNA/tRNA_sequences/immature_seqs.fa",
+        bed=config["species"]+"/tRNA/tRNA_sequences/all_trna_flank50.bed"
     shell:
         """
         shopt -s extglob
@@ -271,9 +275,9 @@ rule download_immature_trna:
         tar -xvzf {params.basename_annot}
         rm -v !("mature_seqs.fa"|"{params.annot_folder}.bed")
         python ../../../scripts/chroms-ucsc-to-other.py --infile {params.annot_folder}.bed --outfile {params.annot_folder}.Gencode.bed --species {params.species}
-        bedtools slop -i {params.annot_folder}.Gencode.bed -b 50 -g ../../../{params.genome_fai} | cut -f1,2,3,4,5,6 > temp_flank50_trna.bed
+        bedtools slop -i {params.annot_folder}.Gencode.bed -b 50 -g ../../../{params.genome_fai} | cut -f1,2,3,4,5,6 > {output.bed}
         gunzip ../../../{params.genome_fa}.gz
-        bedtools getfasta -s -bed temp_flank50_trna.bed -fi ../../../{params.genome_fa} -nameOnly > immature_seqs.fa
+        bedtools getfasta -s -bed {output.bed} -fi ../../../{params.genome_fa} -nameOnly > immature_seqs.fa
         pigz ../../../{params.genome_fa}
         rm *bed
         """
