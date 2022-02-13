@@ -279,7 +279,7 @@ rule download_immature_trna:
         gunzip ../../../{params.genome_fa}.gz
         bedtools getfasta -s -bed {output.bed} -fi ../../../{params.genome_fa} -nameOnly > immature_seqs.fa
         pigz ../../../{params.genome_fa}
-        rm *bed
+        rm {params.annot_folder}.Gencode.bed {params.annot_folder}.bed
         """
 
 rule immature_tRNA_bowtie_index:
