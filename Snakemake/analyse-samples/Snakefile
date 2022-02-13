@@ -285,9 +285,9 @@ rule NOPREMAPgenomeMapreads:
         --readFilesIn {input.fastq} \
         --outFileNamePrefix {params.outprefix} --genomeLoad NoSharedMemory \
         --outFilterMultimapNmax 100 --outFilterMultimapScoreRange 1 --readFilesCommand zcat \
-        --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
+        --alignSJoverhangMin 10000000 --alignSJDBoverhangMin 10000000 --outFilterType BySJout \
         --alignIntronMin 20 --alignIntronMax 1000000 --outSAMtype BAM SortedByCoordinate --outFilterScoreMin 10 --alignEndsType Extend5pOfRead1 \
-        --outFilterMismatchNmax 2
+        --outFilterMismatchNmax 0.04
         sambamba index -t {threads} {output.sam} {output.bai}
         bedtools bamtobed -i {output.sam} > {output.bed}
         bedtools intersect -a {output.bed} -b ../prepare-annotation/Human_hg38/tRNA/tRNA_sequences/all_trna_flank50.bed -s -wa -wb -loj > {output.t_bed}
