@@ -263,7 +263,8 @@ rule download_immature_trna:
         genome_fa=config["species"]+"/full_genome/full_seq.fa",
         genome_fai=config["species"]+"/full_genome/full_seq.fa.fai",
         cluster= '-N 1 -c 1 --mem=16G -t 00:30:00',
-        log=config["species"]+"/logs"
+        log=config["species"]+"/logs",
+        bed="all_trna_flank50.bed"
     output:
         fasta=config["species"]+"/tRNA/tRNA_sequences/immature_seqs.fa",
         bed=config["species"]+"/tRNA/tRNA_sequences/all_trna_flank50.bed"
@@ -275,9 +276,9 @@ rule download_immature_trna:
         tar -xvzf {params.basename_annot}
         rm -v !("mature_seqs.fa"|"{params.annot_folder}.bed")
         python ../../../scripts/chroms-ucsc-to-other.py --infile {params.annot_folder}.bed --outfile {params.annot_folder}.Gencode.bed --species {params.species}
-        bedtools slop -i {params.annot_folder}.Gencode.bed -b 50 -g ../../../{params.genome_fai} | cut -f1,2,3,4,5,6 > {output.bed}
+        bedtools slop -i {params.annot_folder}.Gencode.bed -b 50 -g ../../../{params.genome_fai} | cut -f1,2,3,4,5,6 > {params.bed}
         gunzip ../../../{params.genome_fa}.gz
-        bedtools getfasta -s -bed {output.bed} -fi ../../../{params.genome_fa} -nameOnly > immature_seqs.fa
+        bedtools getfasta -s -bed {params.bed} -fi ../../../{params.genome_fa} -nameOnly > immature_seqs.fa
         pigz ../../../{params.genome_fa}
         rm {params.annot_folder}.Gencode.bed {params.annot_folder}.bed
         """
