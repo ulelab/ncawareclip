@@ -20,7 +20,8 @@ rule all:
         expand("results/xlsites/{sample}_mito.bedgraph", sample=config["samples"]),
         expand("results/xlsites/{sample}_repeats_cdna.bed", sample=config["samples"]),
         expand("results/xlsites/{sample}_genome.bedgraph", sample=config["samples"]),
-        expand("results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"])
+        expand("results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
+        expand("results/no_premap_genome_mapped/{sample}.no_premap_snRNA_overlap.tsv", sample=config["samples"])
 
 # ---------------------------------------------------------------------------
 # First trim reads
@@ -267,6 +268,8 @@ rule NOPREMAPgenomeMapreads:
         sam="results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam",
         bai="results/no_premap_genome_mapped/{sample}.Aligned.sortedByCoord.out.bam.bai",
         bed="results/no_premap_genome_mapped/{sample}.no_premap.bed",
+        t_bed="results/no_premap_genome_mapped/{sample}.no_premap_tRNA_overlap.tsv",
+        s_bed="results/no_premap_genome_mapped/{sample}.no_premap_snRNA_overlap.tsv",
         logfolder="results/logs/{sample}.NOPREMAP_genome_mapped.Log.final.out"
     params:
         star_index=config["genome_minus_mito_index"],
@@ -287,6 +290,8 @@ rule NOPREMAPgenomeMapreads:
          --outFilterMismatchNoverReadLmax 0.04
         sambamba index -t {threads} {output.sam} {output.bai}
         bedtools bamtobed -i {output.sam} > {output.bed}
+        bedtools intersect -a {output.bed} -b ../prepare-annotation/Human_hg38/tRNA/tRNA_sequences/all_trna_flank50.bed -s -wa -wb > {output.t_bed}
+        bedtools intersect -a {output.bed} -b ../prepare-annotation/Human_hg38/snRNA/all_snrna_flank50.bed -s -wa -wb > {output.s_bed}
         mv {params.log} {output.logfolder}
         """
 
