@@ -268,8 +268,8 @@ rule NOPREMAPgenomeMapreads:
         logfolder="results/logs/{sample}.NOPREMAP_genome_mapped.Log.final.out"
     params:
         star_index=config["genome_minus_mito_index"],
-        log="results/genome_mapped/{sample}.Log.final.out",
-        outprefix="results/genome_mapped/{sample}.",
+        log="results/no_premap_genome_mapped/{sample}.Log.final.out",
+        outprefix="results/no_premap_genome_mapped/{sample}.",
         cluster= '-p cpu -J map_reads  -t 2:00:00 -n 1 --mem-per-cpu 8GB -c 8'
     threads:
         8
