@@ -3,8 +3,8 @@ samples:
 # tRNA dominant
     NSUN2_HEK293T_1: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/NSUN2_miCLIP/demux_NNNCAATNN.fq.gz
     NSUN2_HEK293T_2: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/NSUN2_miCLIP/demux_NNNGGCGNN.fq.gz
-    TRMT2A_miCLIP_1: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/TRMT2A_miCLIP/demux_NNNGGTTNN.fq.gz
-    TRMT2A_miCLIP_2: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/TRMT2A_miCLIP/demux_NNNTTGTNN.fq.gz
+    TRMT2A_miCLIP_1: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/TRMT2A_miCLIP/TRMT2A_FICC_rep1.fq.gz
+    TRMT2A_miCLIP_2: /camp/lab/luscomben/home/users/capitac/miCLIP_UN1710_CS2_delta2/summarising_trna_mapping_style/tRNA_paper/TRMT2A_miCLIP/TRMT2A_FICC_rep2.fq.gz
 # snRNA dominant
     SMB_human_1: /camp/home/capitac/capitac/ncawareclip/Data/Smb_mild_HEK293_rep1_ERR3450336.fq.gz
     SMB_human_2: /camp/home/capitac/capitac/ncawareclip/Data/Smb_mild_HEK293_rep2_ERR3450337.fq.gz
