@@ -455,7 +455,7 @@ rule get_repeats_cDNA_counts:
         bed="results/xlsites/{sample}_repeats.bed",
         beddedupe="results/xlsites/{sample}_repeats_cdna.bed"
     params:
-        cluster="-N 1 -c 1 --mem=8G -t 1:00:00",
+        cluster="-N 1 -c 1 --mem=128G -t 2:00:00",
         remove_duplicates_ncRNA=config["remove_duplicates_ncRNA"]
     run:
         if {params.remove_duplicates_ncRNA}:
