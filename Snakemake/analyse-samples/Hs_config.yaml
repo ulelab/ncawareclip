@@ -13,8 +13,8 @@ samples:
 # Classic iCLIP
     TIA1_1: /camp/lab/luscomben/home/shared/projects/marc_char_peaks/raw_data/TIA1_iCLIP/demux_NNNGGTTNN.fq.gz
     TIA1_2: /camp/lab/luscomben/home/shared/projects/marc_char_peaks/raw_data/TIA1_iCLIP/demux_NNNTTGTNN.fq.gz
-    PTBP1_1: /camp/lab/luscomben/home/shared/projects/marc_char_peaks/raw_data/PTBP1_iCLIP/ERR689064_rep1.fq.gz
-    PTBP1_2: /camp/lab/luscomben/home/shared/projects/marc_char_peaks/raw_data/PTBP1_iCLIP/ERR689063_rep2.fq.gz
+    PTBP1_1: /camp/home/capitac/capitac/ncawareclip/Data/ptbp1_4su_hek293_rep1_ERR1588764.fq.gz
+    PTBP1_2: /camp/home/capitac/capitac/ncawareclip/Data/ptbp1_4su_hek293_rep2_ERR1588765.fq.gz
     HNRNPC_1: /camp/home/capitac/capitac/classic_iclip/hnrnpc_irclip_flynn/demux_5bc_NNNNNCGTGATNNN.fq.gz
     HNRNPC_2: /camp/home/capitac/capitac/classic_iclip/hnrnpc_irclip_flynn/demux_5bc_NNNNNACATCGNNN.fq.gz
     TDP-43_1: /camp/home/capitac/capitac/ncawareclip/Data/tardbp-293flp-1-20181129-ju_trimmed.fq.gz 
