@@ -53,4 +53,6 @@ snakemake --keep-going --cluster 'sbatch {params.cluster}' --jobs 200 --latency-
 
 # Publications using this pipeline
 
+Varier, R. A., Sideri, T., Capitanchik, C., Manova, Z., Calvani, E., Rossi, A., ... & van Werven, F. (2022). m6A reader Pho92 is recruited co-transcriptionally and couples translation efficacy to mRNA decay to promote meiotic fitness in yeast. eLife
+
 For any questions please feel free to raise a GitHub issue or contact me at charlotte.capitanchik@crick.ac.uk.
