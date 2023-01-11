@@ -20,7 +20,7 @@ conda env create -f environment.yml
 conda activate ncawareclip
 ```
 
-3. Create the full annotation/sequence databases you will need, and get your configuration file started using the handy helper tool. Supported genomes are currently: "Hs", - human, "Mm", - mouse", Dm", - Drosophila, "Dr", - Zebrafish, "Rn", - rat, "Sc" - budding yeast (SacCer3) and "Sck1" - budding yeast (SK1, used in meiotic research). Note: you only need to run this once for each species you analyse. Note2: in this pipeline all annotation origins and processing code is all in this repo, so certain files could be replaced if you wanted.
+3. Create the full annotation/sequence databases you will need, and get your configuration file started using the handy helper tool. Supported genomes are currently: "Hs", - human. Note: you only need to run this once for each species you analyse. Note2: in this pipeline all annotation origins and processing code is all in this repo, so certain files could be replaced if you wanted.
 
 For example, to create all the annotation indexes you'll need for human mapping, run:
 ```
@@ -34,22 +34,9 @@ snakemake --keep-going --cluster 'sbatch {params.cluster}' --jobs 200 --latency-
 ```
 
 4. Edit `config.yaml` to provide paths to your demultiplexed fastq files and path where you are running the pipeline. For UMI removal make sure that the random barcode is moved to the fastq header as "rbc:NNNNN". I would highly recommend the speedy demultiplexer [Ultraplex](https://github.com/ulelab/ultraplex) for completely unbiased reasons.
-```
-```
 
 5. Run the Snakemake pipeline.
-```
-```
 
-# The output
-
-# Detailed pipeline options
-
-# Notes on tRNAs
-
-# Notes on snRNAs
-
-# Notes on RepBase
 
 # Publications using this pipeline
 
